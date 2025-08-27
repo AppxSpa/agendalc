@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.agendalc.agendalc.entities.Solicitud;
+import com.agendalc.agendalc.entities.Tramite;
 
 import java.util.List;
 import java.time.LocalDate;
@@ -26,5 +27,9 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
             Solicitud.EstadoSolicitud estado);
 
     List<Solicitud> findByFechaSolicitudBetween(LocalDate fechaInicio, LocalDate fechaFin);
+
+    Solicitud findFirstByRutOrderByFechaSolicitudDesc(Integer rut);
+
+    Solicitud findFirstByRutAndTramiteOrderByFechaSolicitudDesc(Integer rut, Tramite tramite);
 
 }

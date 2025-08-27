@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -90,6 +91,23 @@ public class CitaController {
     public ResponseEntity<Object> getCitabyRut(@PathVariable Integer rut) {
         try {
             List<SolicitudCitaResponse> response = citaService.getCitaByRut(rut);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
+    }
+
+    @GetMapping("/entre-fechas")
+    @PreAuthorize("hasRole('FUNC')")
+    public ResponseEntity<Object> getCitabyRutBetween(
+            @RequestParam LocalDate fechaInicio,
+            @RequestParam LocalDate fechaFin) {
+        try {
+            List<SolicitudCitaResponse> response = citaService.getCitaBetweenDates(fechaInicio, fechaFin);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

@@ -2,7 +2,7 @@ package com.agendalc.agendalc.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +17,9 @@ import com.agendalc.agendalc.dto.SolicitudCitaResponse;
 import com.agendalc.agendalc.entities.Agenda;
 import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
+import com.agendalc.agendalc.entities.Solicitud;
 import com.agendalc.agendalc.repositories.CitaRepository;
+import com.agendalc.agendalc.repositories.SolicitudRepository;
 import com.agendalc.agendalc.services.interfaces.AgendaService;
 import com.agendalc.agendalc.services.interfaces.ApiMailService;
 import com.agendalc.agendalc.services.interfaces.ApiPersonaService;
@@ -40,15 +42,19 @@ public class CitaServiceImpl implements CitaService {
 
     private final ApiMailService apiMailService;
 
+    private final SolicitudRepository solicitudRepository;
+
     public CitaServiceImpl(CitaRepository citaRepository, AgendaService agendaService,
             BloqueHorarioService bloqueHorarioService,
             ApiPersonaService apiPersonaService,
-            ApiMailService apiMailService) {
+            ApiMailService apiMailService,
+            SolicitudRepository solicitudRepository) {
         this.citaRepository = citaRepository;
         this.agendaService = agendaService;
         this.bloqueHorarioService = bloqueHorarioService;
         this.apiPersonaService = apiPersonaService;
         this.apiMailService = apiMailService;
+        this.solicitudRepository = solicitudRepository;
     }
 
     @Transactional
@@ -85,19 +91,29 @@ public class CitaServiceImpl implements CitaService {
 
         CitaDto citaDto = new CitaDto(cita);
 
-        String fechaFormateada = formatFecha(cita.getFechaHora().toLocalDate());
-
-        String horaFormateada = formatHora(cita.getFechaHora());
-
-        HashMap<String, Object> variables = new HashMap<>();
-
-        variables.put("nombre", persona.getNombres());
-        variables.put("fecha", fechaFormateada);
-        variables.put("hora", horaFormateada);
+        HashMap<String, Object> variables = createVariablesCorreoCita(cita, persona.getNombres());
 
         apiMailService.sendEmail(persona.getEmail(), "Agenda de hora", "cita-template", variables);
 
         return citaDto;
+    }
+
+    private HashMap<String, Object> createVariablesCorreoCita(Cita cita, String nombre) {
+
+        HashMap<String, Object> variables = new HashMap<>();
+
+        variables.put("nombre", nombre);
+        variables.put("fecha", obiteneFechaCita(cita));
+        variables.put("hora", obtenerHoraCita(cita));
+        return variables;
+    }
+
+    private LocalDate obiteneFechaCita(Cita cita) {
+        return cita.getFechaAgenda();
+    }
+
+    private LocalTime obtenerHoraCita(Cita cita) {
+        return cita.getHoraInicioBloqueHoraio();
     }
 
     @Override
@@ -115,19 +131,23 @@ public class CitaServiceImpl implements CitaService {
             throw new IllegalArgumentException("No hay citas para el rut");
         }
 
-        int mesActual = LocalDate.now().getMonthValue();
-
         return citas.stream()
                 .map(cita -> {
 
                     SolicitudCitaResponse dto = new SolicitudCitaResponse();
 
+                    Solicitud solicitud = solicitudRepository
+                            .findFirstByRutAndTramiteOrderByFechaSolicitudDesc(cita.getRut(), cita.getTramite());
+                    if (solicitud != null) {
+                        dto.setFechaSolicitud(solicitud.getFechaSolicitud());
+                    }
+
                     dto.setRut(cita.getRut());
-                    dto.setFechaSolicitud(cita.getFechaHora().toLocalDate());
-                    dto.setFechaAgenda(cita.getAgenda().getFecha());
-                    dto.setIdBloque(cita.getBloqueHorario().getIdBloque());
-                    dto.setHoraInicioBloque(cita.getBloqueHorario().getHoraInicio());
-                    dto.setHoraFinBloque(cita.getBloqueHorario().getHoraFin());
+                    dto.setFechaAgenda(cita.getFechaAgenda());
+                    dto.setIdBloque(cita.getIdBloqueHorario());
+                    dto.setHoraInicioBloque(cita.getHoraInicioBloqueHoraio());
+                    dto.setHoraFinBloque(cita.getHoraFinBloqueHoraio());
+                    dto.setNombreTramite(cita.nombreTramite());
 
                     PersonaResponse persona = apiPersonaService.getPersonaInfo(cita.getRut());
 
@@ -142,7 +162,6 @@ public class CitaServiceImpl implements CitaService {
                     return dto;
 
                 })
-                .filter(dto -> dto.getFechaSolicitud().getMonthValue() == mesActual)
                 .toList();
     }
 
@@ -171,20 +190,44 @@ public class CitaServiceImpl implements CitaService {
         return false;
     }
 
-    private String formatFecha(LocalDate fecha) {
+   
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    @Override
+    public List<SolicitudCitaResponse> getCitaBetweenDates(LocalDate fechaInicio,
+            LocalDate fechaFin) {
 
-        return fecha.format(formatter);
+        LocalDateTime fechaHoraInicio = fechaInicio.atStartOfDay();
+        LocalDateTime fechaHoraFin = fechaFin.atTime(LocalTime.MAX);
 
-    }
+        List<Cita> citas = citaRepository.findByFechaHoraBetween(fechaHoraInicio, fechaHoraFin);
 
-    private String formatHora(LocalDateTime fecha) {
+        return citas.stream()
+                .map(cita -> {
 
-        DateTimeFormatter formatHora = DateTimeFormatter.ofPattern("HH:mm");
+                    SolicitudCitaResponse dto = new SolicitudCitaResponse();
 
-        return fecha.toLocalTime().format(formatHora);
+                    dto.setRut(cita.getRut());
+                    dto.setFechaSolicitud(cita.getFechaHora().toLocalDate());
+                    dto.setFechaAgenda(cita.getFechaAgenda());
+                    dto.setIdBloque(cita.getIdBloqueHorario());
+                    dto.setHoraInicioBloque(cita.getHoraInicioBloqueHoraio());
+                    dto.setHoraFinBloque(cita.getHoraFinBloqueHoraio());
+                    dto.setNombreTramite(cita.nombreTramite());
 
+                    PersonaResponse persona = apiPersonaService.getPersonaInfo(cita.getRut());
+
+                    dto.setVrut(persona.getVrut());
+
+                    String nombre = persona.getNombres() + " ";
+                    String paterno = persona.getPaterno() + " ";
+                    String materno = persona.getMaterno();
+
+                    dto.setNombre(nombre.concat(paterno).concat(materno));
+
+                    return dto;
+
+                })
+                .toList();
     }
 
 }

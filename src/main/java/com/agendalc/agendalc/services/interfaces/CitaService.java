@@ -1,5 +1,6 @@
 package com.agendalc.agendalc.services.interfaces;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.agendalc.agendalc.dto.CitaDto;
@@ -18,5 +19,7 @@ public interface CitaService {
     Cita updateCita(Long id, Cita citaActualizada);
 
     boolean deleteCitaById(Long id);
+
+    List<SolicitudCitaResponse> getCitaBetweenDates(LocalDate fechaInicio, LocalDate fechaFin);
 
 }

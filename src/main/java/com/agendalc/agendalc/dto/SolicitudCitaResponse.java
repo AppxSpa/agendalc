@@ -13,6 +13,9 @@ public class SolicitudCitaResponse {
     private LocalTime horaFinBloque;
     private String nombre;
     private String vrut;
+    private String nombreTramite;
+
+    
 
     public LocalDate getFechaAgenda() {
         return fechaAgenda;
@@ -86,6 +89,14 @@ public class SolicitudCitaResponse {
 
     public void setVrut(String vrut) {
         this.vrut = vrut;
+    }
+
+    public String getNombreTramite() {
+        return nombreTramite;
+    }
+
+    public void setNombreTramite(String nombreTramite) {
+        this.nombreTramite = nombreTramite;
     }
 
 }

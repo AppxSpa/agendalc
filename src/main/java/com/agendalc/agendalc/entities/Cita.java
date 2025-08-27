@@ -1,6 +1,8 @@
 package com.agendalc.agendalc.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -74,5 +76,33 @@ public class Cita {
     public void setBloqueHorario(BloqueHorario bloqueHorario) {
         this.bloqueHorario = bloqueHorario;
     }
+
+    public LocalDate getFechaAgenda() {
+        return agenda.getFecha();
+    }
+
+    public Long getIdBloqueHorario() {
+        return this.bloqueHorario.getIdBloque();
+    }
+
+    public LocalTime getHoraInicioBloqueHoraio() {
+        return this.bloqueHorario.getHoraInicio();
+
+    }
+
+    public LocalTime getHoraFinBloqueHoraio() {
+        return this.bloqueHorario.getHoraFin();
+
+    }
+
+    public String nombreTramite() {
+        return this.agenda.getTramite().getNombre();
+    }
+
+    public Tramite getTramite() {
+        return this.agenda.getTramite();
+    }
+
+   
 
 }
