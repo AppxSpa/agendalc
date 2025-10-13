@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Aplica a todas las rutas
-                        .allowedOrigins("http://localhost:5173") // Permitir origen específico
+                        .allowedOrigins("https://dev.appx.cl") // Permitir origen específico
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
                         .allowedHeaders("*") // Todos los encabezados permitidos
                         .allowCredentials(true) // Permitir envío de cookies y encabezados de autenticación
