@@ -2,8 +2,6 @@ package com.agendalc.agendalc.dto;
 
 import java.util.List;
 
-
-
 public class TramiteResponse {
 
     private Long idTramite;

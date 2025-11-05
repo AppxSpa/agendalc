@@ -8,8 +8,6 @@ public class SolicitudResponse {
     private Integer rut;
     private String estado;
 
-    
-
     public SolicitudResponse() {
     }
 

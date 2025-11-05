@@ -15,8 +15,6 @@ public class SolicitudCitaResponse {
     private String vrut;
     private String nombreTramite;
 
-    
-
     public LocalDate getFechaAgenda() {
         return fechaAgenda;
     }
