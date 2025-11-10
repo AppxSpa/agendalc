@@ -5,7 +5,8 @@ import java.util.List;
 
 public class SaludFormularioDto {
     private Integer rut;
-    private LocalDate fechaFormulario; 
+    private LocalDate fechaFormulario;
+    private Long idTramite;
 
     private SaludPersonalesDto personales;
     private List<SaludLicenciasDto> licenciasOtorgadas;
@@ -26,8 +27,6 @@ public class SaludFormularioDto {
     private List<SaludMedicamentoDto> medicamentos;
     private SaludConduccionDto conduccion;
 
-
-  
     public SaludPersonalesDto getPersonales() {
         return personales;
     }
@@ -186,5 +185,13 @@ public class SaludFormularioDto {
 
     public void setRut(Integer rut) {
         this.rut = rut;
+    }
+
+    public Long getIdTramite() {
+        return idTramite;
+    }
+
+    public void setIdTramite(Long idTramite) {
+        this.idTramite = idTramite;
     }
 }

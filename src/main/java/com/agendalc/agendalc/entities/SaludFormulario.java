@@ -10,6 +10,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
@@ -22,6 +24,10 @@ public class SaludFormulario {
 
     private Integer rut;
     private LocalDate fechaFormulario;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tramite")
+    private Tramite tramite;
 
     @OneToOne(mappedBy = "formulario", cascade = CascadeType.ALL)
     private SaludPersonales personales;
@@ -243,6 +249,14 @@ public class SaludFormulario {
 
     public void setPersonales(SaludPersonales personales) {
         this.personales = personales;
+    }
+
+    public Tramite getTramite() {
+        return tramite;
+    }
+
+    public void setTramite(Tramite tramite) {
+        this.tramite = tramite;
     }
 
 }

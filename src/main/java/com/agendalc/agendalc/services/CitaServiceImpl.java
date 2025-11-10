@@ -17,8 +17,10 @@ import com.agendalc.agendalc.dto.SolicitudCitaResponse;
 import com.agendalc.agendalc.entities.Agenda;
 import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
+import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
 import com.agendalc.agendalc.repositories.CitaRepository;
+import com.agendalc.agendalc.repositories.SaludFormularioRepository;
 import com.agendalc.agendalc.repositories.SolicitudRepository;
 import com.agendalc.agendalc.services.interfaces.AgendaService;
 import com.agendalc.agendalc.services.interfaces.ApiMailService;
@@ -44,17 +46,20 @@ public class CitaServiceImpl implements CitaService {
 
     private final SolicitudRepository solicitudRepository;
 
+    private final SaludFormularioRepository saludFormularioRepository;
+
     public CitaServiceImpl(CitaRepository citaRepository, AgendaService agendaService,
             BloqueHorarioService bloqueHorarioService,
             ApiPersonaService apiPersonaService,
             ApiMailService apiMailService,
-            SolicitudRepository solicitudRepository) {
+            SolicitudRepository solicitudRepository, SaludFormularioRepository saludFormularioRepository) {
         this.citaRepository = citaRepository;
         this.agendaService = agendaService;
         this.bloqueHorarioService = bloqueHorarioService;
         this.apiPersonaService = apiPersonaService;
         this.apiMailService = apiMailService;
         this.solicitudRepository = solicitudRepository;
+        this.saludFormularioRepository = saludFormularioRepository;
     }
 
     @Transactional
@@ -83,6 +88,14 @@ public class CitaServiceImpl implements CitaService {
         cita.setRut(citaRequest.getRut());
         cita.setAgenda(agenda);
         cita.setBloqueHorario(bloqueHorario);
+
+        // Lógica para asociar SaludFormulario
+        if (citaRequest.getIdSaludFormulario() != null) {
+            SaludFormulario saludFormulario = saludFormularioRepository.findById(citaRequest.getIdSaludFormulario())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "SaludFormulario no encontrado con id: " + citaRequest.getIdSaludFormulario()));
+            cita.setSaludFormulario(saludFormulario);
+        }
 
         cita = citaRepository.save(cita);
 

@@ -5,6 +5,7 @@ public class CitaRequest {
     private Long idAgenda;
     private Integer rut;
     private Long idBloqueHorario;
+    private Long idSaludFormulario;
 
     public Integer getRut() {
         return rut;
@@ -28,6 +29,14 @@ public class CitaRequest {
 
     public void setIdBloqueHorario(Long getIdBloqueHorario) {
         this.idBloqueHorario = getIdBloqueHorario;
+    }
+
+    public Long getIdSaludFormulario() {
+        return idSaludFormulario;
+    }
+
+    public void setIdSaludFormulario(Long idSaludFormulario) {
+        this.idSaludFormulario = idSaludFormulario;
     }
 
 }

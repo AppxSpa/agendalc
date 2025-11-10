@@ -24,6 +24,7 @@ import com.agendalc.agendalc.entities.DocumentosEliminados;
 import com.agendalc.agendalc.entities.DocumentosSolicitud;
 import com.agendalc.agendalc.entities.DocumentosTramite;
 import com.agendalc.agendalc.entities.MovimientoSolicitud;
+import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
 import com.agendalc.agendalc.entities.Tramite;
 import com.agendalc.agendalc.entities.MovimientoSolicitud.TipoMovimiento;
@@ -31,6 +32,7 @@ import com.agendalc.agendalc.entities.Solicitud.EstadoSolicitud;
 import com.agendalc.agendalc.repositories.DocumentoSolicitudRepository;
 import com.agendalc.agendalc.repositories.DocumentosEliminadosRepository;
 import com.agendalc.agendalc.repositories.DocumentosTramiteRepository;
+import com.agendalc.agendalc.repositories.SaludFormularioRepository;
 import com.agendalc.agendalc.repositories.SolicitudRepository;
 import com.agendalc.agendalc.repositories.TramiteRepository;
 import com.agendalc.agendalc.services.interfaces.ApiPersonaService;
@@ -52,13 +54,15 @@ public class SolicitudServiceImpl implements SolicitudService {
     private final MovimientoSolicitudService movimientoSolicitudService;
     private final DocumentoSolicitudRepository documentoSolicitudRepository;
     private final DocumentosEliminadosRepository documentosEliminadosRepository;
+    private final SaludFormularioRepository saludFormularioRepository; // Inyectado
 
     public SolicitudServiceImpl(SolicitudRepository solicitudCitaRepository, ArchivoService archivoService,
             ApiPersonaService apiPersonaService,
             TramiteRepository tramiteRepository, DocumentosTramiteRepository documentosTramiteRepository,
             MovimientoSolicitudService movimientoSolicitudService,
             DocumentoSolicitudRepository documentoSolicitudRepository,
-            DocumentosEliminadosRepository documentosEliminadosRepository) {
+            DocumentosEliminadosRepository documentosEliminadosRepository,
+            SaludFormularioRepository saludFormularioRepository) { // Añadido al constructor
         this.solicitudRepository = solicitudCitaRepository;
         this.apiPersonaService = apiPersonaService;
         this.tramiteRepository = tramiteRepository;
@@ -67,6 +71,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         this.movimientoSolicitudService = movimientoSolicitudService;
         this.documentoSolicitudRepository = documentoSolicitudRepository;
         this.documentosEliminadosRepository = documentosEliminadosRepository;
+        this.saludFormularioRepository = saludFormularioRepository; // Asignado
     }
 
     @Override
@@ -136,6 +141,14 @@ public class SolicitudServiceImpl implements SolicitudService {
         Solicitud solicitud = new Solicitud();
         solicitud.setRut(request.getRut());
         solicitud.setTramite(tramite);
+
+        // Lógica para asociar SaludFormulario
+        if (request.getIdSaludFormulario() != null) {
+            SaludFormulario saludFormulario = saludFormularioRepository.findById(request.getIdSaludFormulario())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "SaludFormulario no encontrado con id: " + request.getIdSaludFormulario()));
+            solicitud.setSaludFormulario(saludFormulario);
+        }
 
         MovimientoSolicitud primerMovimiento = firstMovement(solicitud, TipoMovimiento.CREACION);
 

@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Cita {
@@ -32,6 +33,10 @@ public class Cita {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_bloque_horario", nullable = false)
     private BloqueHorario bloqueHorario;
+
+    @OneToOne
+    @JoinColumn(name = "id_salud_formulario", nullable = true)
+    private SaludFormulario saludFormulario;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
@@ -101,6 +106,14 @@ public class Cita {
 
     public Tramite getTramite() {
         return this.agenda.getTramite();
+    }
+
+    public SaludFormulario getSaludFormulario() {
+        return saludFormulario;
+    }
+
+    public void setSaludFormulario(SaludFormulario saludFormulario) {
+        this.saludFormulario = saludFormulario;
     }
 
    

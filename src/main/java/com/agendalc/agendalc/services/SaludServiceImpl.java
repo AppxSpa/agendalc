@@ -7,9 +7,13 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.agendalc.agendalc.dto.CitaAsociadaDto;
+import com.agendalc.agendalc.dto.DeclaracionSaludResponse;
 import com.agendalc.agendalc.dto.SaludConduccionDto;
 import com.agendalc.agendalc.dto.SaludFormularioDto;
 import com.agendalc.agendalc.dto.SaludMedicamentoDto;
+import com.agendalc.agendalc.dto.SolicitudAsociadaDto;
+import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.SaludCardio;
 import com.agendalc.agendalc.entities.SaludConduccion;
 import com.agendalc.agendalc.entities.SaludFormulario;
@@ -28,16 +32,28 @@ import com.agendalc.agendalc.entities.SaludEndocrino;
 import com.agendalc.agendalc.entities.SaludOncologico;
 import com.agendalc.agendalc.entities.SaludRespiratorio;
 import com.agendalc.agendalc.entities.SaludPersonales;
+import com.agendalc.agendalc.entities.Solicitud;
+import com.agendalc.agendalc.entities.Tramite;
+import com.agendalc.agendalc.repositories.CitaRepository;
 import com.agendalc.agendalc.repositories.SaludFormularioRepository;
+import com.agendalc.agendalc.repositories.SolicitudRepository;
+import com.agendalc.agendalc.repositories.TramiteRepository;
 import com.agendalc.agendalc.services.interfaces.SaludService;
 
 @Service
 public class SaludServiceImpl implements SaludService {
 
     private final SaludFormularioRepository formularioRepository;
+    private final TramiteRepository tramiteRepository;
+    private final SolicitudRepository solicitudRepository;
+    private final CitaRepository citaRepository;
 
-    public SaludServiceImpl(SaludFormularioRepository formularioRepository) {
+    public SaludServiceImpl(SaludFormularioRepository formularioRepository, TramiteRepository tramiteRepository,
+            SolicitudRepository solicitudRepository, CitaRepository citaRepository) {
         this.formularioRepository = formularioRepository;
+        this.tramiteRepository = tramiteRepository;
+        this.solicitudRepository = solicitudRepository;
+        this.citaRepository = citaRepository;
     }
 
     private Integer parseRut(String rut) {
@@ -72,6 +88,12 @@ public class SaludServiceImpl implements SaludService {
         SaludFormulario f = new SaludFormulario();
         f.setRut(dto.getRut());
         f.setFechaFormulario(dto.getFechaFormulario());
+
+        if (dto.getIdTramite() != null) {
+            Tramite tramite = tramiteRepository.findById(dto.getIdTramite())
+                    .orElseThrow(() -> new RuntimeException("Tramite no encontrado con id: " + dto.getIdTramite()));
+            f.setTramite(tramite);
+        }
 
         // Llamar a mappers por responsabilidad
         mapPersonales(dto, f);
@@ -381,6 +403,9 @@ public class SaludServiceImpl implements SaludService {
     private SaludFormularioDto mapToDto(SaludFormulario f) {
         SaludFormularioDto dto = new SaludFormularioDto();
         dto.setRut(f.getRut());
+        if (f.getTramite() != null) {
+            dto.setIdTramite(f.getTramite().getIdTramite());
+        }
 
         dto.setPersonales(toPersonalesDto(f.getPersonales()));
         dto.setLicenciasOtorgadas(toLicenciasDto(f.getLicenciasOtorgadas()));
@@ -680,4 +705,42 @@ public class SaludServiceImpl implements SaludService {
 
         return od;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DeclaracionSaludResponse> findDeclaracionesByRut(String rut) {
+        Integer rutInt = parseRut(rut);
+        if (rutInt == null) {
+            return new ArrayList<>();
+        }
+
+        List<SaludFormulario> formularios = formularioRepository.findByRutOrderByFechaFormularioDesc(rutInt);
+        List<DeclaracionSaludResponse> responseList = new ArrayList<>();
+
+        for (SaludFormulario formulario : formularios) {
+            DeclaracionSaludResponse response = new DeclaracionSaludResponse();
+            response.setDeclaracion(mapToDto(formulario));
+
+            // Buscar Solicitud asociada
+            Optional<Solicitud> solicitudOpt = solicitudRepository.findBySaludFormulario(formulario);
+            if (solicitudOpt.isPresent()) {
+                Solicitud sol = solicitudOpt.get();
+                response.setSolicitudAsociada(
+                        new SolicitudAsociadaDto(sol.getIdSolicitud(), sol.getEstado().name(), sol.getFechaSolicitud()));
+            }
+
+            // Buscar Cita asociada
+            Optional<Cita> citaOpt = citaRepository.findBySaludFormulario(formulario);
+            if (citaOpt.isPresent()) {
+                Cita c = citaOpt.get();
+                response.setCitaAsociada(new CitaAsociadaDto(c.getIdCita(), c.getFechaHora(), c.getAgenda().getIdAgenda()));
+            }
+
+            responseList.add(response);
+        }
+
+        return responseList;
+    }
 }
+
+        

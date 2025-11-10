@@ -2,11 +2,11 @@ package com.agendalc.agendalc.dto;
 
 public class SaludJornadaDto {
     public enum TipoJornada {
-        DIURNA, TURNO
+        DIURNA, TURNO, DESEMPLEADO
     }
 
     public enum SubtipoJornada {
-        FIJO, ROTATIVO
+        FIJO, ROTATIVO, DESEMPLEADO
     }
 
     private TipoJornada tipoJornada;

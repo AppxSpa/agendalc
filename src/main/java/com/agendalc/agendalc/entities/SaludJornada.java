@@ -25,12 +25,14 @@ public class SaludJornada {
 
     public enum TipoJornada {
         DIURNA,
-        TURNO
+        TURNO,
+        DESEMPLEADO
     }
 
     public enum SubtipoJornada {
         FIJO,
-        ROTATIVO
+        ROTATIVO,
+        DESEMPLEADO
     }
 
     public Long getId() {

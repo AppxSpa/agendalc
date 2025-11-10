@@ -6,6 +6,7 @@ public class SolicitudRequest {
 
     private Long idTramite;
     private Integer rut;
+    private Long idSaludFormulario; // Nuevo campo
     private List<DocumentosSubidosRequest> documentos;
 
     public SolicitudRequest() {
@@ -38,7 +39,28 @@ public class SolicitudRequest {
         return documentos;
     }
 
-    public void setDocumentos(List<DocumentosSubidosRequest> documentos) {
-        this.documentos = documentos;
+        public void setDocumentos(List<DocumentosSubidosRequest> documentos) {
+
+            this.documentos = documentos;
+
+        }
+
+    
+
+        public Long getIdSaludFormulario() {
+
+            return idSaludFormulario;
+
+        }
+
+    
+
+        public void setIdSaludFormulario(Long idSaludFormulario) {
+
+            this.idSaludFormulario = idSaludFormulario;
+
+        }
+
     }
-}
+
+    

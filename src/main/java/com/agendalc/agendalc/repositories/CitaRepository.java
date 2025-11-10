@@ -2,23 +2,19 @@ package com.agendalc.agendalc.repositories;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-import com.agendalc.agendalc.entities.Agenda;
-import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
+import com.agendalc.agendalc.entities.SaludFormulario;
 
-@Repository
 public interface CitaRepository extends JpaRepository<Cita, Long> {
-
-    long countByAgendaAndBloqueHorario(Agenda agenda, BloqueHorario bloqueHorario);
-
-    List<Cita> findByBloqueHorario(BloqueHorario bloqueHorario);
 
     List<Cita> findByRut(Integer rut);
 
-     List<Cita> findByFechaHoraBetween( LocalDateTime fechaInicio, LocalDateTime fechaFin);
+    Optional<Cita> findBySaludFormulario(SaludFormulario saludFormulario);
+
+    List<Cita> findByFechaHoraBetween(LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin);
 
 }

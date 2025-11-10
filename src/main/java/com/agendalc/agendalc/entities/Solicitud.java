@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 
 @Entity
@@ -32,6 +33,10 @@ public class Solicitud {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tramite", nullable = false)
     private Tramite tramite;
+
+    @OneToOne
+    @JoinColumn(name = "id_salud_formulario", nullable = true)
+    private SaludFormulario saludFormulario;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -159,11 +164,36 @@ public class Solicitud {
         return null;
     }
 
-    public String getNombreTramite() {
-        if (this.tramite != null) {
-            return this.tramite.getNombre();
+        public String getNombreTramite() {
+
+            if (this.tramite != null) {
+
+                return this.tramite.getNombre();
+
+            }
+
+            return null;
+
         }
-        return null;
+
+    
+
+        public SaludFormulario getSaludFormulario() {
+
+            return saludFormulario;
+
+        }
+
+    
+
+        public void setSaludFormulario(SaludFormulario saludFormulario) {
+
+            this.saludFormulario = saludFormulario;
+
+        }
+
+    
+
     }
 
-}
+    

@@ -2,8 +2,11 @@ package com.agendalc.agendalc.controllers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.agendalc.agendalc.dto.DeclaracionSaludResponse;
 import com.agendalc.agendalc.dto.SaludFormularioDto;
 import com.agendalc.agendalc.services.interfaces.SaludService;
+
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
@@ -32,5 +35,14 @@ public class SaludController {
         return saludService.findByRut(rut)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/declaraciones/{rut}")
+    public ResponseEntity<List<DeclaracionSaludResponse>> buscarDeclaracionesPorRut(@PathVariable String rut) {
+        List<DeclaracionSaludResponse> declaraciones = saludService.findDeclaracionesByRut(rut);
+        if (declaraciones.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(declaraciones);
     }
 }
