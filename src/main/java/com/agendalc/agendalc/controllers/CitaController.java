@@ -1,9 +1,11 @@
 package com.agendalc.agendalc.controllers;
 
+import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
 import com.agendalc.agendalc.dto.SolicitudCitaResponse;
 import com.agendalc.agendalc.entities.Cita;
+import com.agendalc.agendalc.exceptions.NotFounException;
 import com.agendalc.agendalc.services.interfaces.CitaService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -67,6 +69,19 @@ public class CitaController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+    }
+
+    @GetMapping("/hoy/{rut}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'FUNC')")
+    public ResponseEntity<Object> getCitaDeHoyPorRut(@PathVariable Integer rut) {
+        try {
+            CitaDelDiaResponseDto response = citaService.findCitaDelDiaPorRut(rut);
+            return ResponseEntity.ok(response);
+        } catch (NotFounException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(ERROR_KEY, e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")

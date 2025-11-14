@@ -3,6 +3,7 @@ package com.agendalc.agendalc.services.interfaces;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
 import com.agendalc.agendalc.dto.SolicitudCitaResponse;
@@ -21,5 +22,7 @@ public interface CitaService {
     boolean deleteCitaById(Long id);
 
     List<SolicitudCitaResponse> getCitaBetweenDates(LocalDate fechaInicio, LocalDate fechaFin);
+
+    CitaDelDiaResponseDto findCitaDelDiaPorRut(Integer rut);
 
 }

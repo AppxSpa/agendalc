@@ -32,9 +32,20 @@ public class Tramite {
     @OneToMany(mappedBy = "tramite", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DocumentosTramite> documentosRequeridos;
 
+    @OneToMany(mappedBy = "tramite", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EtapaTramite> etapas;
+
     private boolean pideDocumentos;
 
     private boolean requiereSolicitud;
+
+    public List<EtapaTramite> getEtapas() {
+        return etapas;
+    }
+
+    public void setEtapas(List<EtapaTramite> etapas) {
+        this.etapas = etapas;
+    }
 
     public boolean isPideDocumentos() {
         return pideDocumentos;

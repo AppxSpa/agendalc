@@ -22,7 +22,7 @@ public class SaludController {
 
     @PostMapping
     public ResponseEntity<SaludFormularioDto> guardarInformacionSalud(@RequestBody SaludFormularioDto request) {
-        if (request.getRut() == null ) {
+        if (request.getRut() == null) {
             return ResponseEntity.badRequest().build();
         }
 

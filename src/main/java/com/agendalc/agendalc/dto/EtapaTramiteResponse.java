@@ -1,16 +1,17 @@
 package com.agendalc.agendalc.dto;
 
-public class DocumentosTramiteResponse {
-
+public class EtapaTramiteResponse {
     private Long id;
     private String nombre;
+    private Integer orden;
 
-    public DocumentosTramiteResponse() {
+    public EtapaTramiteResponse() {
     }
 
-    public DocumentosTramiteResponse(Long id, String nombre) {
+    public EtapaTramiteResponse(Long id, String nombre, Integer orden) {
         this.id = id;
         this.nombre = nombre;
+        this.orden = orden;
     }
 
     public Long getId() {
@@ -29,4 +30,11 @@ public class DocumentosTramiteResponse {
         this.nombre = nombre;
     }
 
+    public Integer getOrden() {
+        return orden;
+    }
+
+    public void setOrden(Integer orden) {
+        this.orden = orden;
+    }
 }

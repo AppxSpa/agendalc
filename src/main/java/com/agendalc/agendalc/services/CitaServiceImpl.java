@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
 import com.agendalc.agendalc.dto.PersonaResponse;
@@ -19,6 +20,7 @@ import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
+import com.agendalc.agendalc.exceptions.NotFounException;
 import com.agendalc.agendalc.repositories.CitaRepository;
 import com.agendalc.agendalc.repositories.SaludFormularioRepository;
 import com.agendalc.agendalc.repositories.SolicitudRepository;
@@ -241,6 +243,25 @@ public class CitaServiceImpl implements CitaService {
 
                 })
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CitaDelDiaResponseDto findCitaDelDiaPorRut(Integer rut) {
+        LocalDate hoy = LocalDate.now();
+        Cita cita = citaRepository.findByRutAndAgenda_Fecha(rut, hoy)
+                .orElseThrow(() -> new NotFounException("No se encontró una cita para el RUT " + rut + " en la fecha de hoy."));
+
+        PersonaResponse persona = apiPersonaService.getPersonaInfo(cita.getRut());
+
+        return new CitaDelDiaResponseDto(
+            cita.getIdCita(),
+            cita.getFechaAgenda(),
+            cita.getHoraInicioBloqueHoraio(),
+            persona,
+            cita.getTramite().getIdTramite(),
+            cita.getTramite().getNombre()
+        );
     }
 
 }

@@ -12,6 +12,7 @@ import com.agendalc.agendalc.dto.DeclaracionSaludResponse;
 import com.agendalc.agendalc.dto.SaludConduccionDto;
 import com.agendalc.agendalc.dto.SaludFormularioDto;
 import com.agendalc.agendalc.dto.SaludMedicamentoDto;
+import com.agendalc.agendalc.dto.SaludSituacionLaboralDto;
 import com.agendalc.agendalc.dto.SolicitudAsociadaDto;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.SaludCardio;
@@ -32,6 +33,7 @@ import com.agendalc.agendalc.entities.SaludEndocrino;
 import com.agendalc.agendalc.entities.SaludOncologico;
 import com.agendalc.agendalc.entities.SaludRespiratorio;
 import com.agendalc.agendalc.entities.SaludPersonales;
+import com.agendalc.agendalc.entities.SaludSituacionLaboral;
 import com.agendalc.agendalc.entities.Solicitud;
 import com.agendalc.agendalc.entities.Tramite;
 import com.agendalc.agendalc.repositories.CitaRepository;
@@ -99,6 +101,7 @@ public class SaludServiceImpl implements SaludService {
         mapPersonales(dto, f);
         mapLicencias(dto, f);
         mapEstudios(dto, f);
+        mapSituacionLaboral(dto, f);
         mapProfesion(dto, f);
         mapJornada(dto, f);
         mapCardio(dto, f);
@@ -167,6 +170,21 @@ public class SaludServiceImpl implements SaludService {
         }
         e.setFormulario(f);
         f.setEstudios(e);
+    }
+
+    private void mapSituacionLaboral(SaludFormularioDto dto, SaludFormulario f) {
+        if (dto.getSituacionLaboral() == null)
+            return;
+        SaludSituacionLaboral s = new SaludSituacionLaboral();
+        try {
+            if (dto.getSituacionLaboral().getSituacionLaboral() != null) {
+                s.setSituacionLaboral(SaludSituacionLaboral.SituacionLaboral.valueOf(dto.getSituacionLaboral().getSituacionLaboral().name()));
+            }
+        } catch (Exception ex) {
+            // ignore invalid enum values
+        }
+        s.setFormulario(f);
+        f.setSituacionLaboral(s);
     }
 
     private void mapProfesion(SaludFormularioDto dto, SaludFormulario f) {
@@ -410,6 +428,7 @@ public class SaludServiceImpl implements SaludService {
         dto.setPersonales(toPersonalesDto(f.getPersonales()));
         dto.setLicenciasOtorgadas(toLicenciasDto(f.getLicenciasOtorgadas()));
         dto.setEstudios(toEstudiosDto(f.getEstudios()));
+        dto.setSituacionLaboral(toSituacionLaboralDto(f.getSituacionLaboral()));
         dto.setProfesion(toProfesionDto(f.getProfesion()));
         dto.setJornada(toJornadaDto(f.getJornada()));
         dto.setCardio(toCardioDto(f.getCardio()));
@@ -463,6 +482,21 @@ public class SaludServiceImpl implements SaludService {
             }
         }
         return ed;
+    }
+
+    private SaludSituacionLaboralDto toSituacionLaboralDto(SaludSituacionLaboral s) {
+        if (s == null)
+            return null;
+        SaludSituacionLaboralDto sd = new SaludSituacionLaboralDto();
+        if (s.getSituacionLaboral() != null) {
+            try {
+                sd.setSituacionLaboral(
+                        SaludSituacionLaboralDto.SituacionLaboral.valueOf(s.getSituacionLaboral().name()));
+            } catch (IllegalArgumentException ex) {
+                // ignore
+            }
+        }
+        return sd;
     }
 
     private com.agendalc.agendalc.dto.SaludProfesionDto toProfesionDto(SaludProfesion p) {
