@@ -6,6 +6,9 @@ public class CitaRequest {
     private Integer rut;
     private Long idBloqueHorario;
     private Long idSaludFormulario;
+    private Long idSolicitud;
+
+    
 
     public Integer getRut() {
         return rut;
@@ -37,6 +40,14 @@ public class CitaRequest {
 
     public void setIdSaludFormulario(Long idSaludFormulario) {
         this.idSaludFormulario = idSaludFormulario;
+    }
+
+    public Long getIdSolicitud() {
+        return idSolicitud;
+    }
+
+    public void setIdSolicitud(Long idSolicitud) {
+        this.idSolicitud = idSolicitud;
     }
 
 }

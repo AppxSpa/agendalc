@@ -424,7 +424,7 @@ public class SaludServiceImpl implements SaludService {
         if (f.getTramite() != null) {
             dto.setIdTramite(f.getTramite().getIdTramite());
         }
-
+        dto.setIdDeclaracion(f.getId());
         dto.setPersonales(toPersonalesDto(f.getPersonales()));
         dto.setLicenciasOtorgadas(toLicenciasDto(f.getLicenciasOtorgadas()));
         dto.setEstudios(toEstudiosDto(f.getEstudios()));

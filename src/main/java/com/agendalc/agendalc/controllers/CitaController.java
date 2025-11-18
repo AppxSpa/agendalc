@@ -3,7 +3,6 @@ package com.agendalc.agendalc.controllers;
 import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
-import com.agendalc.agendalc.dto.SolicitudCitaResponse;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.exceptions.NotFounException;
 import com.agendalc.agendalc.services.interfaces.CitaService;
@@ -105,7 +104,7 @@ public class CitaController {
     @PreAuthorize("hasRole('FUNC')")
     public ResponseEntity<Object> getCitabyRut(@PathVariable Integer rut) {
         try {
-            List<SolicitudCitaResponse> response = citaService.getCitaByRut(rut);
+            List<CitaDto> response = citaService.getCitaByRut(rut);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
@@ -122,7 +121,7 @@ public class CitaController {
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin) {
         try {
-            List<SolicitudCitaResponse> response = citaService.getCitaBetweenDates(fechaInicio, fechaFin);
+            List<CitaDto> response = citaService.getCitaBetweenDates(fechaInicio, fechaFin);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

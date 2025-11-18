@@ -10,9 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.agendalc.agendalc.dto.AgendaRequest;
 import com.agendalc.agendalc.dto.AgendaResponse;
-import com.agendalc.agendalc.dto.BloqueHorarioResponse;
-import com.agendalc.agendalc.dto.DocumentosTramiteResponse;
-import com.agendalc.agendalc.dto.TramiteResponse;
 import com.agendalc.agendalc.entities.Agenda;
 import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Tramite;
@@ -20,6 +17,7 @@ import com.agendalc.agendalc.repositories.AgendaRepository;
 import com.agendalc.agendalc.services.interfaces.AgendaService;
 import com.agendalc.agendalc.services.interfaces.BloqueHorarioService;
 import com.agendalc.agendalc.services.interfaces.TramiteService;
+import com.agendalc.agendalc.services.mappers.AgendaMapper;
 
 @Service
 public class AgendaServiceImpl implements AgendaService {
@@ -30,12 +28,14 @@ public class AgendaServiceImpl implements AgendaService {
     private final AgendaRepository agendaRepository;
     private final BloqueHorarioService bloqueHorarioService;
     private final TramiteService tramiteService;
+    private final AgendaMapper agendaMapper;
 
     public AgendaServiceImpl(AgendaRepository agendaRepository, BloqueHorarioService bloqueHorarioService,
-            TramiteService tramiteService) {
+            TramiteService tramiteService, AgendaMapper agendaMapper) {
         this.agendaRepository = agendaRepository;
         this.bloqueHorarioService = bloqueHorarioService;
         this.tramiteService = tramiteService;
+        this.agendaMapper = agendaMapper;
     }
 
     @Transactional
@@ -141,41 +141,8 @@ public class AgendaServiceImpl implements AgendaService {
             throw new IllegalArgumentException("No se encontraron agendas");
         }
 
-        return agendas.stream().map(agenda -> {
-            AgendaResponse agendaResponse = new AgendaResponse();
-            agendaResponse.setIdAgenda(agenda.getIdAgenda());
-            agendaResponse.setFechaAgenda(agenda.getFecha());
+        return agendaMapper.toAgendaResponseList(agendas);
 
-            TramiteResponse tramiteResponse = new TramiteResponse();
-            tramiteResponse.setIdTramite(agenda.getIdTramite());
-            tramiteResponse.setNombreTramite(agenda.getNombreTramite());
-
-            // Mapear documentos requeridos
-            List<DocumentosTramiteResponse> documentosRequeridos = agenda.getTramite().getDocumentosRequeridos()
-                    .stream().map(documento -> {
-                        DocumentosTramiteResponse dto = new DocumentosTramiteResponse();
-                        dto.setId(documento.getIdDocumento());
-                        dto.setNombre(documento.getNombreDocumento());
-                        return dto;
-                    }).toList();
-
-            tramiteResponse.setDocumentosRequeridos(documentosRequeridos);
-
-            // Mapear bloques horarios
-            List<BloqueHorarioResponse> bloquesHorarios = agenda.getBloquesHorarios().stream().map(bloque -> {
-                BloqueHorarioResponse dto = new BloqueHorarioResponse();
-                dto.setId(bloque.getIdBloque());
-                dto.setHoraFin(bloque.getHoraFin().toString());
-                dto.setHoraInicio(bloque.getHoraInicio().toString());
-                dto.setCuposDisponibles(bloque.getCuposDisponibles());
-                return dto;
-            }).toList();
-
-            agendaResponse.setTramite(tramiteResponse);
-            agendaResponse.setBloqueHorario(bloquesHorarios);
-
-            return agendaResponse;
-        }).toList();
     }
 
     @Transactional

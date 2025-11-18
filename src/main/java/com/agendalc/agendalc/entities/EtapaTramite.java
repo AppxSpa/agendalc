@@ -1,47 +1,59 @@
 package com.agendalc.agendalc.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "etapas_tramite")
+@Table(name = "etapa_tramite")
 public class EtapaTramite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tramite")
+    private Tramite tramite;
 
     private String nombre;
+    private int orden;
 
-    private Integer orden;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tramite_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Tramite tramite;
+    @OneToMany(mappedBy = "etapaTramite")
+    @JsonIgnore
+    private List<UsuarioEtapa> usuariosEtapa;
 
     public EtapaTramite() {
     }
 
-    public EtapaTramite(String nombre, Integer orden, Tramite tramite) {
+    public EtapaTramite(Tramite tramite, String nombre, int orden) {
+        this.tramite = tramite;
         this.nombre = nombre;
         this.orden = orden;
-        this.tramite = tramite;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
+    }
+
+    public Tramite getTramite() {
+        return tramite;
+    }
+
+    public void setTramite(Tramite tramite) {
+        this.tramite = tramite;
     }
 
     public String getNombre() {
@@ -52,19 +64,19 @@ public class EtapaTramite {
         this.nombre = nombre;
     }
 
-    public Integer getOrden() {
+    public int getOrden() {
         return orden;
     }
 
-    public void setOrden(Integer orden) {
+    public void setOrden(int orden) {
         this.orden = orden;
     }
 
-    public Tramite getTramite() {
-        return tramite;
+    public List<UsuarioEtapa> getUsuariosEtapa() {
+        return usuariosEtapa;
     }
 
-    public void setTramite(Tramite tramite) {
-        this.tramite = tramite;
+    public void setUsuariosEtapa(List<UsuarioEtapa> usuariosEtapa) {
+        this.usuariosEtapa = usuariosEtapa;
     }
 }

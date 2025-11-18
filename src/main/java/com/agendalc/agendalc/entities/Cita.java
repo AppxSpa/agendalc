@@ -38,6 +38,10 @@ public class Cita {
     @JoinColumn(name = "id_salud_formulario", nullable = true)
     private SaludFormulario saludFormulario;
 
+    @OneToOne
+    @JoinColumn(name = "id_solicitud", nullable = true)
+    private Solicitud solicitud;
+
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime fechaHora;
@@ -112,10 +116,26 @@ public class Cita {
         return saludFormulario;
     }
 
-    public void setSaludFormulario(SaludFormulario saludFormulario) {
-        this.saludFormulario = saludFormulario;
+        public void setSaludFormulario(SaludFormulario saludFormulario) {
+
+            this.saludFormulario = saludFormulario;
+
+        }
+
+    
+
+        public Solicitud getSolicitud() {
+
+            return solicitud;
+
+        }
+
+    
+
+        public void setSolicitud(Solicitud solicitud) {
+
+            this.solicitud = solicitud;
+
+        }
+
     }
-
-   
-
-}

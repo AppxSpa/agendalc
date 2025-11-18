@@ -25,6 +25,9 @@ public class FilaAtencion {
     private Cita cita;
 
     @ManyToOne
+    private Tramite tramite;
+
+    @ManyToOne
     private EtapaTramite etapaTramite;
 
     @Enumerated(EnumType.STRING)
@@ -44,6 +47,7 @@ public class FilaAtencion {
     private FilaAtencion(Builder builder) {
         this.id = builder.id;
         this.cita = builder.cita;
+        this.tramite = builder.tramite;
         this.etapaTramite = builder.etapaTramite;
         this.estado = builder.estado;
         this.usuarioAsignado = builder.usuarioAsignado;
@@ -70,6 +74,14 @@ public class FilaAtencion {
 
     public void setCita(Cita cita) {
         this.cita = cita;
+    }
+
+    public Tramite getTramite() {
+        return tramite;
+    }
+
+    public void setTramite(Tramite tramite) {
+        this.tramite = tramite;
     }
 
     public EtapaTramite getEtapaTramite() {
@@ -123,6 +135,7 @@ public class FilaAtencion {
     public static class Builder {
         private Long id;
         private Cita cita;
+        private Tramite tramite;
         private EtapaTramite etapaTramite;
         private EstadoFila estado;
         private String usuarioAsignado;
@@ -137,6 +150,11 @@ public class FilaAtencion {
 
         public Builder cita(Cita cita) {
             this.cita = cita;
+            return this;
+        }
+
+        public Builder tramite(Tramite tramite) {
+            this.tramite = tramite;
             return this;
         }
 

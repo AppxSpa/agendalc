@@ -1,6 +1,6 @@
 package com.agendalc.agendalc.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.agendalc.agendalc.entities.Cita;
 
@@ -8,14 +8,18 @@ public class CitaDto {
     private Long idCita;
     private Integer rut;
     private Long idAgenda;
-    private LocalDateTime fechaHora;
+    private LocalDate fechaHora;
+    private SolicitudAsociadaDto solicitud;
+    private TramiteResponse tramite;
 
     public CitaDto(Cita cita) {
         this.idCita = cita.getIdCita();
         this.rut = cita.getRut();
         this.idAgenda = cita.getAgenda().getIdAgenda();
-        this.fechaHora = cita.getFechaHora();
+        this.fechaHora = cita.getAgenda().getFecha();
     }
+
+    
 
     public Long getIdCita() {
         return idCita;
@@ -41,12 +45,38 @@ public class CitaDto {
         this.idAgenda = idAgenda;
     }
 
-    public LocalDateTime getFechaHora() {
+    public LocalDate getFechaHora() {
         return fechaHora;
     }
 
-    public void setFechaHora(LocalDateTime fechaHora) {
+    public void setFechaHora(LocalDate fechaHora) {
+
         this.fechaHora = fechaHora;
+
+    }
+
+    public SolicitudAsociadaDto getSolicitud() {
+
+        return solicitud;
+
+    }
+
+    public void setSolicitud(SolicitudAsociadaDto solicitud) {
+
+        this.solicitud = solicitud;
+
+    }
+
+
+
+    public TramiteResponse getTramite() {
+        return tramite;
+    }
+
+
+
+    public void setTramite(TramiteResponse tramite) {
+        this.tramite = tramite;
     }
 
 }

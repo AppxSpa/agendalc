@@ -33,18 +33,19 @@ public class Tramite {
     private List<DocumentosTramite> documentosRequeridos;
 
     @OneToMany(mappedBy = "tramite", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EtapaTramite> etapas;
+    @jakarta.persistence.OrderBy("orden ASC")
+    private List<TramiteEtapa> tramiteEtapas;
 
     private boolean pideDocumentos;
 
     private boolean requiereSolicitud;
 
-    public List<EtapaTramite> getEtapas() {
-        return etapas;
+    public List<TramiteEtapa> getTramiteEtapas() {
+        return tramiteEtapas;
     }
 
-    public void setEtapas(List<EtapaTramite> etapas) {
-        this.etapas = etapas;
+    public void setTramiteEtapas(List<TramiteEtapa> tramiteEtapas) {
+        this.tramiteEtapas = tramiteEtapas;
     }
 
     public boolean isPideDocumentos() {

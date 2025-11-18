@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.agendalc.agendalc.dto.FilaAtencionResponseDto;
-import com.agendalc.agendalc.dto.PersonaResponse;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.EtapaTramite;
 import com.agendalc.agendalc.entities.FilaAtencion;
@@ -19,8 +18,8 @@ import com.agendalc.agendalc.repositories.CitaRepository;
 import com.agendalc.agendalc.repositories.EtapaTramiteRepository;
 import com.agendalc.agendalc.repositories.FilaAtencionRepository;
 import com.agendalc.agendalc.repositories.UsuarioEtapaRepository;
-import com.agendalc.agendalc.services.interfaces.ApiPersonaService;
 import com.agendalc.agendalc.services.interfaces.FilaAtencionService;
+import com.agendalc.agendalc.services.mappers.FilaAtencionMapper;
 
 @Service
 public class FilaAtencionServiceImpl implements FilaAtencionService {
@@ -29,42 +28,56 @@ public class FilaAtencionServiceImpl implements FilaAtencionService {
     private final CitaRepository citaRepository;
     private final EtapaTramiteRepository etapaTramiteRepository;
     private final UsuarioEtapaRepository usuarioEtapaRepository;
-    private final ApiPersonaService apiPersonaService;
+    private final com.agendalc.agendalc.repositories.TramiteRepository tramiteRepository;
+    private final FilaAtencionMapper filaAtencionMapper;
 
     public FilaAtencionServiceImpl(FilaAtencionRepository filaAtencionRepository, CitaRepository citaRepository,
             EtapaTramiteRepository etapaTramiteRepository, UsuarioEtapaRepository usuarioEtapaRepository,
-            ApiPersonaService apiPersonaService) {
+            com.agendalc.agendalc.repositories.TramiteRepository tramiteRepository, FilaAtencionMapper filaAtencionMapper) {
         this.filaAtencionRepository = filaAtencionRepository;
         this.citaRepository = citaRepository;
         this.etapaTramiteRepository = etapaTramiteRepository;
         this.usuarioEtapaRepository = usuarioEtapaRepository;
-        this.apiPersonaService = apiPersonaService;
+        this.tramiteRepository = tramiteRepository;
+        this.filaAtencionMapper = filaAtencionMapper;
     }
 
     @Override
     @Transactional
-    public FilaAtencionResponseDto iniciarProceso(Long citaId) {
+    public List<FilaAtencionResponseDto> iniciarProceso(Long citaId, com.agendalc.agendalc.dto.IniciarProcesosRequest request) {
         Cita cita = citaRepository.findById(citaId)
                 .orElseThrow(() -> new NotFounException("Cita no encontrada con ID: " + citaId));
 
-        if (cita.getTramite() == null) {
-            throw new IllegalStateException("La cita no tiene un trámite asociado para iniciar el proceso.");
+        if (request.getTramiteIds() == null || request.getTramiteIds().isEmpty()) {
+            throw new IllegalArgumentException("La lista de IDs de trámites no puede ser nula o vacía.");
         }
-        Long tramiteId = cita.getTramite().getIdTramite();
 
-        EtapaTramite primeraEtapa = etapaTramiteRepository.findByTramite_IdTramiteAndOrden(tramiteId, 1)
-                .orElseThrow(
-                        () -> new NotFounException("No se encontró la primera etapa para el trámite ID: " + tramiteId));
+        List<FilaAtencion> nuevasFilas = new java.util.ArrayList<>();
 
-        FilaAtencion nuevaFila = FilaAtencion.builder()
-                .cita(cita)
-                .etapaTramite(primeraEtapa)
-                .estado(EstadoFila.EN_ESPERA)
-                .fechaLlegada(LocalDateTime.now())
-                .build();
+        for (Long tramiteId : request.getTramiteIds()) {
+            com.agendalc.agendalc.entities.Tramite tramite = tramiteRepository.findById(tramiteId)
+                    .orElseThrow(() -> new NotFounException("Trámite no encontrado con ID: " + tramiteId));
 
-        FilaAtencion savedFila = filaAtencionRepository.save(nuevaFila);
-        return toResponseDto(savedFila);
+            EtapaTramite primeraEtapa = tramite.getTramiteEtapas().stream()
+                    .findFirst() // La lista ya está ordenada por "orden"
+                    .map(com.agendalc.agendalc.entities.TramiteEtapa::getEtapaTramite)
+                    .orElseThrow(() -> new NotFounException("El trámite ID: " + tramiteId + " no tiene etapas configuradas."));
+
+            // Evitar duplicados: no crear una fila si ya existe para esa cita y etapa
+            if (filaAtencionRepository.findByCitaAndEtapaTramite(cita, primeraEtapa).isEmpty()) {
+                FilaAtencion nuevaFila = FilaAtencion.builder()
+                        .cita(cita)
+                        .tramite(tramite)
+                        .etapaTramite(primeraEtapa)
+                        .estado(EstadoFila.EN_ESPERA)
+                        .fechaLlegada(LocalDateTime.now())
+                        .build();
+                nuevasFilas.add(nuevaFila);
+            }
+        }
+
+        List<FilaAtencion> savedFilas = filaAtencionRepository.saveAll(nuevasFilas);
+        return filaAtencionMapper.toResponseDtoList(savedFilas);
     }
 
     @Override
@@ -76,7 +89,7 @@ public class FilaAtencionServiceImpl implements FilaAtencionService {
         List<FilaAtencion> filas = filaAtencionRepository.findByEtapaTramiteAndEstadoOrderByFechaLlegadaAsc(etapa,
                 EstadoFila.EN_ESPERA);
 
-        return filas.stream().map(this::toResponseDto).toList();
+        return filaAtencionMapper.toResponseDtoList(filas);
     }
 
     @Override
@@ -100,7 +113,7 @@ public class FilaAtencionServiceImpl implements FilaAtencionService {
         proximoEnFila.setFechaInicioAtencion(LocalDateTime.now());
 
         FilaAtencion savedFila = filaAtencionRepository.save(proximoEnFila);
-        return toResponseDto(savedFila);
+        return filaAtencionMapper.toResponseDto(savedFila);
     }
 
     @Override
@@ -117,29 +130,48 @@ public class FilaAtencionServiceImpl implements FilaAtencionService {
             throw new IllegalStateException("Esta atención está asignada a otro usuario.");
         }
 
-        filaActual.setEstado(EstadoFila.FINALIZADO);
         filaActual.setFechaFinAtencion(LocalDateTime.now());
+        filaActual.setEstado(EstadoFila.EN_ATENCION);
         FilaAtencion filaFinalizada = filaAtencionRepository.save(filaActual);
 
-        // Lógica para mover a la siguiente etapa
+        moverASiguienteEtapaSiCorresponde(filaFinalizada);
+
+        return filaAtencionMapper.toResponseDto(filaFinalizada);
+    }
+
+    private void moverASiguienteEtapaSiCorresponde(FilaAtencion filaFinalizada) {
+        com.agendalc.agendalc.entities.Tramite tramiteDelFlujo = filaFinalizada.getTramite();
+        if (tramiteDelFlujo == null) {
+            return; // No hay trámite asociado, no hay siguiente etapa.
+        }
+
+        List<com.agendalc.agendalc.entities.TramiteEtapa> etapasDelTramite = tramiteDelFlujo.getTramiteEtapas();
         EtapaTramite etapaActual = filaFinalizada.getEtapaTramite();
-        Long tramiteId = etapaActual.getTramite().getIdTramite();
-        int ordenActual = etapaActual.getOrden();
 
-        etapaTramiteRepository.findByTramite_IdTramiteAndOrden(tramiteId, ordenActual + 1).ifPresent(siguienteEtapa -> {
-            // Evitar duplicados: solo crear la nueva fila si no existe una ya para esa cita y etapa
-            if (filaAtencionRepository.findByCitaAndEtapaTramite(filaFinalizada.getCita(), siguienteEtapa).isEmpty()) {
-                FilaAtencion nuevaFila = FilaAtencion.builder()
-                        .cita(filaFinalizada.getCita())
-                        .etapaTramite(siguienteEtapa)
-                        .estado(EstadoFila.EN_ESPERA)
-                        .fechaLlegada(LocalDateTime.now())
-                        .build();
-                filaAtencionRepository.save(nuevaFila);
+        for (int i = 0; i < etapasDelTramite.size(); i++) {
+            if (etapasDelTramite.get(i).getEtapaTramite().equals(etapaActual)) {
+                // Si no es la última etapa, pasar a la siguiente
+                if (i < etapasDelTramite.size() - 1) {
+                    EtapaTramite siguienteEtapa = etapasDelTramite.get(i + 1).getEtapaTramite();
+                    crearNuevaFilaSiNoExiste(filaFinalizada, tramiteDelFlujo, siguienteEtapa);
+                }
+                break; // Salir del bucle una vez encontrada y procesada la etapa
             }
-        });
+        }
+    }
 
-        return toResponseDto(filaFinalizada);
+    private void crearNuevaFilaSiNoExiste(FilaAtencion filaAnterior, com.agendalc.agendalc.entities.Tramite tramite, EtapaTramite nuevaEtapa) {
+        // Evitar duplicados: solo crear la nueva fila si no existe una ya para esa cita y etapa
+        if (filaAtencionRepository.findByCitaAndEtapaTramite(filaAnterior.getCita(), nuevaEtapa).isEmpty()) {
+            FilaAtencion nuevaFila = FilaAtencion.builder()
+                    .cita(filaAnterior.getCita())
+                    .tramite(tramite)
+                    .etapaTramite(nuevaEtapa)
+                    .estado(EstadoFila.EN_ESPERA)
+                    .fechaLlegada(LocalDateTime.now())
+                    .build();
+            filaAtencionRepository.save(nuevaFila);
+        }
     }
 
     @Override
@@ -147,7 +179,7 @@ public class FilaAtencionServiceImpl implements FilaAtencionService {
     public FilaAtencionResponseDto verAtencionActual() {
         String usuarioId = getCurrentUserId();
         return filaAtencionRepository.findByUsuarioAsignadoAndEstado(usuarioId, EstadoFila.EN_ATENCION)
-                .stream().findFirst().map(this::toResponseDto).orElse(null);
+                .stream().findFirst().map(filaAtencionMapper::toResponseDto).orElse(null);
     }
 
     @Override
@@ -161,25 +193,8 @@ public class FilaAtencionServiceImpl implements FilaAtencionService {
                 .flatMap(etapa -> filaAtencionRepository
                         .findByEtapaTramiteAndEstadoOrderByFechaLlegadaAsc(etapa, EstadoFila.EN_ESPERA)
                         .stream()
-                        .map(this::toResponseDto))
+                        .map(filaAtencionMapper::toResponseDto))
                 .toList();
-    }
-
-    private FilaAtencionResponseDto toResponseDto(FilaAtencion fila) {
-        // Obtenemos los datos de la persona desde el servicio de API de personas
-        PersonaResponse persona = apiPersonaService.getPersonaInfo(fila.getCita().getRut());
-
-        return new FilaAtencionResponseDto(
-                fila.getId(),
-                fila.getCita().getIdCita(),
-                persona,
-                fila.getEtapaTramite().getId(),
-                fila.getEtapaTramite().getNombre(),
-                fila.getEstado(),
-                fila.getUsuarioAsignado(),
-                fila.getFechaLlegada(),
-                fila.getFechaInicioAtencion(),
-                fila.getFechaFinAtencion());
     }
 
     private String getCurrentUserId() {
@@ -207,6 +222,6 @@ public class FilaAtencionServiceImpl implements FilaAtencionService {
         personaEnFila.setFechaInicioAtencion(LocalDateTime.now());
 
         FilaAtencion savedFila = filaAtencionRepository.save(personaEnFila);
-        return toResponseDto(savedFila);
+        return filaAtencionMapper.toResponseDto(savedFila);
     }
 }

@@ -1,7 +1,6 @@
 package com.agendalc.agendalc.services;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,7 @@ public class UsuarioEtapaServiceImpl implements UsuarioEtapaService {
     public List<UsuarioEtapaResponseDto> findAll() {
         return usuarioEtapaRepository.findAll().stream()
                 .map(this::toResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -47,7 +46,7 @@ public class UsuarioEtapaServiceImpl implements UsuarioEtapaService {
     public List<UsuarioEtapaResponseDto> findByUsuarioId(String usuarioId) {
         return usuarioEtapaRepository.findByUsuarioId(usuarioId).stream()
                 .map(this::toResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

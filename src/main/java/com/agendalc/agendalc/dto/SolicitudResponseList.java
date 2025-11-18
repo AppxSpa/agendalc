@@ -17,6 +17,15 @@ public class SolicitudResponseList {
     private Set<MovimientosDto> movimientos;
     private Set<ObservacionesDto> observaciones;
     private Set<DocumentosDto> documentos;
+    private CitaAsociadaDto cita;
+
+    public CitaAsociadaDto getCita() {
+        return cita;
+    }
+
+    public void setCita(CitaAsociadaDto cita) {
+        this.cita = cita;
+    }
 
     public String getNombreTramite() {
         return nombreTramite;

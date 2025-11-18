@@ -7,6 +7,7 @@ public class SolicitudRequest {
     private Long idTramite;
     private Integer rut;
     private Long idSaludFormulario; // Nuevo campo
+    private Long idCita;
     private List<DocumentosSubidosRequest> documentos;
 
     public SolicitudRequest() {
@@ -16,6 +17,14 @@ public class SolicitudRequest {
         this.idTramite = idTramite;
         this.rut = rut;
         this.documentos = documentos;
+    }
+
+    public Long getIdCita() {
+        return idCita;
+    }
+
+    public void setIdCita(Long idCita) {
+        this.idCita = idCita;
     }
 
     // Getters y Setters

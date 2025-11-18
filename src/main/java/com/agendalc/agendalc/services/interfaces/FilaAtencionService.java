@@ -3,15 +3,17 @@ package com.agendalc.agendalc.services.interfaces;
 import java.util.List;
 
 import com.agendalc.agendalc.dto.FilaAtencionResponseDto;
+import com.agendalc.agendalc.dto.IniciarProcesosRequest;
 
 public interface FilaAtencionService {
     
     /**
-     * Inicia el proceso de atención para una cita, creando la primera entrada en la fila.
+     * Inicia el proceso de atención para una cita, creando una entrada en la fila por cada trámite solicitado.
      * @param citaId El ID de la cita que inicia el proceso.
-     * @return El DTO de la primera entrada en la fila.
+     * @param request El DTO que contiene la lista de IDs de trámites a iniciar.
+     * @return Una lista de DTOs de las entradas creadas en la fila.
      */
-    FilaAtencionResponseDto iniciarProceso(Long citaId);
+    List<FilaAtencionResponseDto> iniciarProceso(Long citaId, IniciarProcesosRequest request);
 
     /**
      * Obtiene la lista de personas en espera para una etapa específica.

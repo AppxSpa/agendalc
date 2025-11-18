@@ -7,6 +7,7 @@ public class SaludFormularioDto {
     private Integer rut;
     private LocalDate fechaFormulario;
     private Long idTramite;
+    private Long idDeclaracion;
 
     private SaludPersonalesDto personales;
     private List<SaludLicenciasDto> licenciasOtorgadas;
@@ -26,6 +27,8 @@ public class SaludFormularioDto {
     private SaludOtrosDto otros;
     private List<SaludMedicamentoDto> medicamentos;
     private SaludConduccionDto conduccion;
+
+    
 
     public SaludPersonalesDto getPersonales() {
         return personales;
@@ -193,5 +196,13 @@ public class SaludFormularioDto {
 
     public void setIdTramite(Long idTramite) {
         this.idTramite = idTramite;
+    }
+
+    public Long getIdDeclaracion() {
+        return idDeclaracion;
+    }
+
+    public void setIdDeclaracion(Long idDeclaracion) {
+        this.idDeclaracion = idDeclaracion;
     }
 }
