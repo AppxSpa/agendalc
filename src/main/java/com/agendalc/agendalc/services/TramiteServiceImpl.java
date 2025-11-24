@@ -37,7 +37,6 @@ public class TramiteServiceImpl implements TramiteService {
 
         return tramiteMapper.mapToTRamiteResponseList(tramites);
 
-        
     }
 
     @Override
@@ -63,7 +62,5 @@ public class TramiteServiceImpl implements TramiteService {
         }
         return false;
     }
-
-   
 
 }

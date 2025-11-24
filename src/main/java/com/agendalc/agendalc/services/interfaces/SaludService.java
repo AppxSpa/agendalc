@@ -8,20 +8,10 @@ import java.util.Optional;
 
 public interface SaludService {
 
-
-
     SaludFormularioDto saveFormulario(SaludFormularioDto dto);
-
-
 
     Optional<SaludFormularioDto> findByRut(String rut);
 
-
-
     List<DeclaracionSaludResponse> findDeclaracionesByRut(String rut);
 
-
-
 }
-
-

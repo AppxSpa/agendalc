@@ -3,7 +3,7 @@ package com.agendalc.agendalc.dto;
 public class SaludOtrosDto {
     private OperadoDto operaciones;
     private EnfermedadDto enfermedad;
-    private LicenciaMedicaDto otraEnfermedad;
+    private LicenciaMedicaDto licencias;
 
     public static class OperadoDto {
         private boolean operado;
@@ -86,11 +86,11 @@ public class SaludOtrosDto {
         this.enfermedad = enfermedad;
     }
 
-    public LicenciaMedicaDto getOtraEnfermedad() {
-        return otraEnfermedad;
+    public LicenciaMedicaDto getLicencias() {
+        return licencias;
     }
 
-    public void setOtraEnfermedad(LicenciaMedicaDto otraEnfermedad) {
-        this.otraEnfermedad = otraEnfermedad;
+    public void setLicencias(LicenciaMedicaDto otraEnfermedad) {
+        this.licencias = otraEnfermedad;
     }
 }

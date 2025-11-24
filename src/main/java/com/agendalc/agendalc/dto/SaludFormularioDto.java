@@ -27,6 +27,7 @@ public class SaludFormularioDto {
     private SaludOtrosDto otros;
     private List<SaludMedicamentoDto> medicamentos;
     private SaludConduccionDto conduccion;
+    private String firma;
 
     
 
@@ -204,5 +205,13 @@ public class SaludFormularioDto {
 
     public void setIdDeclaracion(Long idDeclaracion) {
         this.idDeclaracion = idDeclaracion;
+    }
+
+    public String getFirma() {
+        return firma;
+    }
+
+    public void setFirma(String firma) {
+        this.firma = firma;
     }
 }

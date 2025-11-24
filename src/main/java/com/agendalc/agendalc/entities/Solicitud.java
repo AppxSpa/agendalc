@@ -2,7 +2,6 @@ package com.agendalc.agendalc.entities;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -51,10 +50,12 @@ public class Solicitud {
     @OneToMany(mappedBy = "solicitud", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ObservacionSolicitud> observaciones = new HashSet<>();
 
-    @OneToMany(mappedBy = "solicitud", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DocumentosSolicitud> documentosEntregados;
-
     private String asignadoA;
+
+    @OneToOne(mappedBy = "solicitud", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SolcitudRechazo solcitudRehazo;
+
+    
 
     public enum EstadoSolicitud {
         PENDIENTE,
@@ -141,14 +142,6 @@ public class Solicitud {
         this.fechaSolicitud = fechaSolicitud;
     }
 
-    public List<DocumentosSolicitud> getDocumentosEntregados() {
-        return documentosEntregados;
-    }
-
-    public void setDocumentosEntregados(List<DocumentosSolicitud> documentosEntregados) {
-        this.documentosEntregados = documentosEntregados;
-    }
-
     public String getAsignadoA() {
         return asignadoA;
     }
@@ -164,36 +157,43 @@ public class Solicitud {
         return null;
     }
 
-        public String getNombreTramite() {
+    public String getNombreTramite() {
 
-            if (this.tramite != null) {
+        if (this.tramite != null) {
 
-                return this.tramite.getNombre();
-
-            }
-
-            return null;
+            return this.tramite.getNombre();
 
         }
 
-    
-
-        public SaludFormulario getSaludFormulario() {
-
-            return saludFormulario;
-
-        }
-
-    
-
-        public void setSaludFormulario(SaludFormulario saludFormulario) {
-
-            this.saludFormulario = saludFormulario;
-
-        }
-
-    
+        return null;
 
     }
 
-    
+    public SaludFormulario getSaludFormulario() {
+
+        return saludFormulario;
+
+    }
+
+    public void setSaludFormulario(SaludFormulario saludFormulario) {
+
+        this.saludFormulario = saludFormulario;
+
+    }
+
+    public SolcitudRechazo getSolcitudRehazo() {
+        return solcitudRehazo;
+    }
+
+    public void setSolcitudRehazo(SolcitudRechazo solcitudRehazo) {
+        this.solcitudRehazo = solcitudRehazo;
+    }
+
+    public String getMotivoRechazo() {
+        if (this.solcitudRehazo != null) {
+            return this.solcitudRehazo.getMotivoRechazo();
+        }
+        return null;
+    }
+
+}

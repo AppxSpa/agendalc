@@ -18,6 +18,14 @@ public class SolicitudResponseList {
     private Set<ObservacionesDto> observaciones;
     private Set<DocumentosDto> documentos;
     private CitaAsociadaDto cita;
+    private RechazoDto rechazo;
+
+    public RechazoDto getRechazo() {
+        return rechazo;
+    }
+    public void setRechazo(RechazoDto rechazo) {
+        this.rechazo = rechazo;
+    }
 
     public CitaAsociadaDto getCita() {
         return cita;

@@ -4,6 +4,15 @@ public class AprobeRejectRequest {
 
     private Long idSolicitud;
     private String login;
+    private String motivoRechazo;
+
+    public String getMotivoRechazo() {
+        return motivoRechazo;
+    }
+
+    public void setMotivoRechazo(String motivoRechazo) {
+        this.motivoRechazo = motivoRechazo;
+    }
 
     public Long getIdSolicitud() {
         return idSolicitud;

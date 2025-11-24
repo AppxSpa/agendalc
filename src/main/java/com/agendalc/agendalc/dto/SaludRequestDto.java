@@ -26,6 +26,15 @@ public class SaludRequestDto {
     private String licenciasOtorgadas;
     private String conduccionVehiculos;
     private String otrosAntecedentes;
+    private String firma;
+
+    public String getFirma() {
+        return firma;
+    }
+
+    public void setFirma(String firma) {
+        this.firma = firma;
+    }
 
     public String getRut() {
         return rut;

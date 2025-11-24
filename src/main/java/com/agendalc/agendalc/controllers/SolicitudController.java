@@ -170,7 +170,7 @@ public class SolicitudController {
             @RequestParam MultipartFile file, @RequestParam String login) {
 
         try {
-            solicitudService.replaceFile(idSolicitud, idTipo, file,login);
+            solicitudService.replaceFile(idSolicitud, idTipo, file, login);
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(message, "Archivo reemplazado con exito"));
 
         } catch (Exception e) {
@@ -198,7 +198,7 @@ public class SolicitudController {
     public ResponseEntity<Object> rejectSolicitud(@RequestBody AprobeRejectRequest request) {
 
         try {
-            solicitudService.rejectSolicitu(request.getIdSolicitud(), request.getLogin());
+            solicitudService.rejectSolicitu(request.getIdSolicitud(), request.getLogin(), request.getMotivoRechazo());
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(message, "Solicitud rechazada con exito"));
 
         } catch (Exception e) {
@@ -222,7 +222,6 @@ public class SolicitudController {
         }
 
     }
-
 
     private List<DocumentosSubidosRequest> validateAndBuildDocumentRequests(
             List<MultipartFile> files, List<Long> idTipoDocumentos) {

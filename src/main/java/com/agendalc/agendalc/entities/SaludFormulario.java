@@ -83,6 +83,11 @@ public class SaludFormulario {
     @OneToOne(mappedBy = "formulario", cascade = CascadeType.ALL)
     private SaludConduccion conduccion;
 
+    @OneToOne(mappedBy = "formulario", cascade = CascadeType.ALL)
+    private SaludFirma firma;
+
+    
+
     public SaludCardio getCardio() {
         return cardio;
     }
@@ -257,6 +262,14 @@ public class SaludFormulario {
 
     public void setTramite(Tramite tramite) {
         this.tramite = tramite;
+    }
+
+    public SaludFirma getFirma() {
+        return firma;
+    }
+
+    public void setFirma(SaludFirma firma) {
+        this.firma = firma;
     }
 
 }

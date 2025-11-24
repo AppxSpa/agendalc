@@ -18,13 +18,12 @@ public class CitaMapper {
 
     public Map<String, Object> createVariablesCorreoCita(Cita cita, String nombres) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("nombreUsuario", nombres);
+        variables.put("nombres", nombres);
         variables.put("nombreTramite", cita.nombreTramite());
         variables.put("fechaCita", cita.getFechaAgenda().toString());
         variables.put("horaCita", cita.getHoraInicioBloqueHoraio().toString());
         return variables;
     }
-
 
     public CitaDto toDto(Cita cita) {
         CitaDto dto = new CitaDto(cita);
@@ -33,8 +32,7 @@ public class CitaMapper {
             SolicitudAsociadaDto solicitudDto = new SolicitudAsociadaDto(
                     solicitud.getIdSolicitud(),
                     solicitud.getEstado().name(),
-                    solicitud.getFechaSolicitud()
-            );
+                    solicitud.getFechaSolicitud());
             dto.setSolicitud(solicitudDto);
         } else {
             dto.setSolicitud(null);
@@ -43,7 +41,7 @@ public class CitaMapper {
             dto.setTramite(mapTramiteToDto(cita.getTramite()));
         } else {
             dto.setTramite(null);
-        }   
+        }
         return dto;
     }
 
@@ -52,7 +50,6 @@ public class CitaMapper {
                 .map(this::toDto)
                 .toList();
     }
-
 
     private TramiteResponse mapTramiteToDto(Tramite tramite) {
         TramiteResponse dto = new TramiteResponse();

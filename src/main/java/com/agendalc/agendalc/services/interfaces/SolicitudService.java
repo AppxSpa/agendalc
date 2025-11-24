@@ -32,7 +32,7 @@ public interface SolicitudService {
 
     SolicitudResponse aprobeSolicitud(Long idSolicitud, String loginUsuario);
 
-    SolicitudResponse rejectSolicitu(Long idSolicitud, String loginUsuario);
+    SolicitudResponse rejectSolicitu(Long idSolicitud, String loginUsuario, String motivoRechazo);
 
     void delteSolicitud(Long idSolicitud);
 
