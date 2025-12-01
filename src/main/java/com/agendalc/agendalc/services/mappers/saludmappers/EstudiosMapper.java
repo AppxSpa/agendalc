@@ -9,7 +9,7 @@ import com.agendalc.agendalc.entities.SaludFormulario;
 @Component
 public class EstudiosMapper {
 
-     public void mapEstudios(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapEstudios(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getEstudios() == null)
             return;
         SaludEstudios e = new SaludEstudios();
@@ -23,6 +23,5 @@ public class EstudiosMapper {
         e.setFormulario(f);
         f.setEstudios(e);
     }
-
 
 }

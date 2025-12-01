@@ -15,7 +15,8 @@ public class CitaDelDiaResponseDto {
     public CitaDelDiaResponseDto() {
     }
 
-    public CitaDelDiaResponseDto(Long citaId, LocalDate fecha, LocalTime horaInicio, PersonaResponse persona, Long tramiteId, String tramiteNombre) {
+    public CitaDelDiaResponseDto(Long citaId, LocalDate fecha, LocalTime horaInicio, PersonaResponse persona,
+            Long tramiteId, String tramiteNombre) {
         this.citaId = citaId;
         this.fecha = fecha;
         this.horaInicio = horaInicio;

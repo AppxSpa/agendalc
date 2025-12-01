@@ -38,11 +38,13 @@ public class DigitalizacionController {
 
         try {
             digitalizacionService.guardarDocumentosDigitalizados(request, files);
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Documentos digitalizados y guardados correctamente."));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("message", "Documentos digitalizados y guardados correctamente."));
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al procesar los archivos: " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al procesar los archivos: " + e.getMessage(), e);
         }
     }
 }

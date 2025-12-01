@@ -12,7 +12,7 @@ import com.agendalc.agendalc.entities.SaludLicenciasOtorgadas;
 @Component
 public class LicenciasMapper {
 
-     public void mapLicencias(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapLicencias(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getLicenciasOtorgadas() == null || dto.getLicenciasOtorgadas().isEmpty())
             return;
         List<SaludLicenciasOtorgadas> licencias = new ArrayList<>();

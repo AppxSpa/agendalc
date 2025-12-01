@@ -9,7 +9,7 @@ import com.agendalc.agendalc.entities.SaludProfesion;
 @Component
 public class ProfesionMapper {
 
-     public void mapProfesion(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapProfesion(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getProfesion() == null)
             return;
         SaludProfesion pr = new SaludProfesion();

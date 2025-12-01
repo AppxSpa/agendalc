@@ -8,7 +8,7 @@ import com.agendalc.agendalc.entities.SaludMotriz;
 @Component
 public class MotrizDtoMapper {
 
-     public SaludMotrizDto toMotrizDto(SaludMotriz m) {
+    public SaludMotrizDto toMotrizDto(SaludMotriz m) {
         if (m == null)
             return null;
         SaludMotrizDto md = new SaludMotrizDto();
@@ -16,6 +16,5 @@ public class MotrizDtoMapper {
         md.setPerdidaExtremidades(m.isPerdidaExtremidades());
         return md;
     }
-
 
 }

@@ -10,7 +10,7 @@ import com.agendalc.agendalc.entities.SaludFormulario;
 @Component
 public class ConduccionMapper {
 
-      public void mapConduccion(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapConduccion(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getConduccion() == null)
             return;
         SaludConduccion c = new SaludConduccion();

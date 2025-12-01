@@ -7,7 +7,7 @@ import com.agendalc.agendalc.entities.SaludCardio;
 
 @Component
 public class CardioDtoMapper {
-    
+
     public SaludCardioDto toCardioDto(SaludCardio c) {
         if (c == null)
             return null;

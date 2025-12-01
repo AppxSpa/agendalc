@@ -9,5 +9,6 @@ import com.agendalc.agendalc.entities.SaludFormulario;
 
 public interface SaludFormularioRepository extends JpaRepository<SaludFormulario, Long> {
     Optional<SaludFormulario> findByRut(Integer rut);
+
     List<SaludFormulario> findByRutOrderByFechaFormularioDesc(Integer rut);
 }

@@ -17,6 +17,7 @@ public class FormularioDtoMapper {
     public SaludFormularioDto mapToDto(SaludFormulario f) {
         SaludFormularioDto dto = new SaludFormularioDto();
         dto.setRut(f.getRut());
+        dto.setFechaFormulario(f.getFechaFormulario());
         if (f.getTramite() != null) {
             dto.setIdTramite(f.getTramite().getIdTramite());
         }
@@ -39,7 +40,8 @@ public class FormularioDtoMapper {
         dto.setOtros(saludMappers.otrosDtoMapper.toOtrosDto(f.getOtros()));
         dto.setMedicamentos(saludMappers.medicamentosDtoMapper.toMedicamentosDto(f.getMedicamentos()));
         dto.setConduccion(saludMappers.conduccionDtoMapper.toConduccionDto(f.getConduccion()));
-        // El DTO de formulario almacena la firma como String (base64). Obtener la imagen directamente.
+        // El DTO de formulario almacena la firma como String (base64). Obtener la
+        // imagen directamente.
         dto.setFirma(f.getFirma() != null ? f.getFirma().getImagen() : null);
 
         return dto;

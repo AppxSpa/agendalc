@@ -48,28 +48,22 @@ public class SolicitudRequest {
         return documentos;
     }
 
-        public void setDocumentos(List<DocumentosSubidosRequest> documentos) {
+    public void setDocumentos(List<DocumentosSubidosRequest> documentos) {
 
-            this.documentos = documentos;
-
-        }
-
-    
-
-        public Long getIdSaludFormulario() {
-
-            return idSaludFormulario;
-
-        }
-
-    
-
-        public void setIdSaludFormulario(Long idSaludFormulario) {
-
-            this.idSaludFormulario = idSaludFormulario;
-
-        }
+        this.documentos = documentos;
 
     }
 
-    
+    public Long getIdSaludFormulario() {
+
+        return idSaludFormulario;
+
+    }
+
+    public void setIdSaludFormulario(Long idSaludFormulario) {
+
+        this.idSaludFormulario = idSaludFormulario;
+
+    }
+
+}

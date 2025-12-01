@@ -38,7 +38,7 @@ public class SaludController {
     }
 
     @GetMapping("/declaraciones/{rut}")
-    public ResponseEntity<List<DeclaracionSaludResponse>> buscarDeclaracionesPorRut(@PathVariable String rut) {
+    public ResponseEntity<List<DeclaracionSaludResponse>> buscarDeclaracionesPorRut(@PathVariable Integer rut) {
         List<DeclaracionSaludResponse> declaraciones = saludService.findDeclaracionesByRut(rut);
         if (declaraciones.isEmpty()) {
             return ResponseEntity.notFound().build();

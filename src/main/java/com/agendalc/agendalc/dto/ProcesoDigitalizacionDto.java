@@ -15,7 +15,8 @@ public class ProcesoDigitalizacionDto {
     public ProcesoDigitalizacionDto() {
     }
 
-    public ProcesoDigitalizacionDto(Long id, String rutPersona, Long tramiteId, LocalDateTime fechaProceso, String usuarioResponsable, String observaciones) {
+    public ProcesoDigitalizacionDto(Long id, String rutPersona, Long tramiteId, LocalDateTime fechaProceso,
+            String usuarioResponsable, String observaciones) {
         this.id = id;
         this.rutPersona = rutPersona;
         this.tramiteId = tramiteId;

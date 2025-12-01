@@ -35,7 +35,33 @@ public class MovimientoSolicitud {
         RECHAZO,
         OBSERVACION_AGREGADA, // Un movimiento genérico para cuando se añade una observación
         FINALIZACION,
-        OBSERVACION_RESPONDIDA
+        OBSERVACION_RESPONDIDA;
+
+        public static TipoMovimiento fromInteger(Integer tipo) {
+            if (tipo == null) {
+                throw new IllegalArgumentException("El tipo de movimiento no puede ser nulo");
+            }
+            switch (tipo) {
+                case 0:
+                    return CREACION;
+                case 1:
+                    return ASIGNACION;
+                case 2:
+                    return DERIVACION;
+                case 3:
+                    return APROBACION;
+                case 4:
+                    return RECHAZO;
+                case 5:
+                    return OBSERVACION_AGREGADA;
+                case 6:
+                    return FINALIZACION;
+                case 7:
+                    return OBSERVACION_RESPONDIDA;
+                default:
+                    throw new IllegalArgumentException("Tipo de movimiento desconocido: " + tipo);
+            }
+        }
         // Otros tipos que consideres necesarios
     }
 

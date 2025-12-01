@@ -1,6 +1,5 @@
 package com.agendalc.agendalc.dto;
 
-
 public class SaludLicenciasDto {
 
     private String tipoLicencia;

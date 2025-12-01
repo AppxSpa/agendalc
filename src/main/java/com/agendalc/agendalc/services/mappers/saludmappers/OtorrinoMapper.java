@@ -6,10 +6,10 @@ import com.agendalc.agendalc.dto.SaludFormularioDto;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.SaludOtorrino;
 
-@Component  
+@Component
 public class OtorrinoMapper {
 
-     public void mapOtorrino(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapOtorrino(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getOtorrino() == null)
             return;
         SaludOtorrino o = new SaludOtorrino();

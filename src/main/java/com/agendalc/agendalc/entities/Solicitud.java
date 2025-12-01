@@ -55,8 +55,6 @@ public class Solicitud {
     @OneToOne(mappedBy = "solicitud", cascade = CascadeType.ALL, orphanRemoval = true)
     private SolcitudRechazo solcitudRehazo;
 
-    
-
     public enum EstadoSolicitud {
         PENDIENTE,
         ASIGNADA,

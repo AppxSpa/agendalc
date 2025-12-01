@@ -23,6 +23,7 @@ public class SolicitudResponseList {
     public RechazoDto getRechazo() {
         return rechazo;
     }
+
     public void setRechazo(RechazoDto rechazo) {
         this.rechazo = rechazo;
     }

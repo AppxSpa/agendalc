@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public class UsuarioEtapaRequestDto {
-    
+
     @NotEmpty(message = "El ID de usuario no puede estar vacío")
     private String usuarioId;
 

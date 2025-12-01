@@ -31,7 +31,6 @@ public class SaludOftalmologico {
     private boolean usaLentes;
     private String tipoLente;
 
-
     private boolean operacionOjos;
 
     public Long getId() {
@@ -129,8 +128,6 @@ public class SaludOftalmologico {
     public void setTipoLente(String tipoLente) {
         this.tipoLente = tipoLente;
     }
-
-
 
     public boolean isOperacionOjos() {
         return operacionOjos;

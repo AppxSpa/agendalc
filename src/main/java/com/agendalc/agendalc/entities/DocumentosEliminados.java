@@ -21,8 +21,7 @@ public class DocumentosEliminados {
     public DocumentosEliminados() {
     }
 
-    public 
-    DocumentosEliminados(String nombreArchivo, Long idSolicitud, Long idTipoDocumento) {
+    public DocumentosEliminados(String nombreArchivo, Long idSolicitud, Long idTipoDocumento) {
         this.nombreArchivo = nombreArchivo;
         this.idSolicitud = idSolicitud;
         this.idTipoDocumento = idTipoDocumento;

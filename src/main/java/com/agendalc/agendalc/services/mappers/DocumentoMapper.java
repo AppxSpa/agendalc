@@ -28,12 +28,12 @@ public class DocumentoMapper {
 
         if (documento.getTramite() != null) {
             builder.tramiteId(documento.getTramite().getIdTramite())
-                   .nombreTramite(documento.getTramite().getNombre());
+                    .nombreTramite(documento.getTramite().getNombre());
         }
 
         if (documento.getDocumentosTramite() != null) {
             builder.documentosTramiteId(documento.getDocumentosTramite().getIdDocumento())
-                   .nombreDocumento(documento.getDocumentosTramite().getNombreDocumento());
+                    .nombreDocumento(documento.getDocumentosTramite().getNombreDocumento());
         }
 
         return builder.build();

@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import com.agendalc.agendalc.entities.enums.EstadoFila;
 
 public class FilaAtencionResponseDto {
-    
+
     private Long filaId;
     private Long citaId;
-    private PersonaResponse persona; // Asumo que podemos obtener los datos de la persona
+    private PersonaResponse persona;
     private Long etapaId;
     private String nombreEtapa;
     private EstadoFila estado;
@@ -20,17 +20,17 @@ public class FilaAtencionResponseDto {
     public FilaAtencionResponseDto() {
     }
 
-    public FilaAtencionResponseDto(Long filaId, Long citaId, PersonaResponse persona, Long etapaId, String nombreEtapa, EstadoFila estado, String usuarioAsignado, LocalDateTime fechaLlegada, LocalDateTime fechaInicioAtencion, LocalDateTime fechaFinAtencion) {
-        this.filaId = filaId;
-        this.citaId = citaId;
-        this.persona = persona;
-        this.etapaId = etapaId;
-        this.nombreEtapa = nombreEtapa;
-        this.estado = estado;
-        this.usuarioAsignado = usuarioAsignado;
-        this.fechaLlegada = fechaLlegada;
-        this.fechaInicioAtencion = fechaInicioAtencion;
-        this.fechaFinAtencion = fechaFinAtencion;
+    private FilaAtencionResponseDto(Builder builder) {
+        this.filaId = builder.filaId;
+        this.citaId = builder.citaId;
+        this.persona = builder.persona;
+        this.etapaId = builder.etapaId;
+        this.nombreEtapa = builder.nombreEtapa;
+        this.estado = builder.estado;
+        this.usuarioAsignado = builder.usuarioAsignado;
+        this.fechaLlegada = builder.fechaLlegada;
+        this.fechaInicioAtencion = builder.fechaInicioAtencion;
+        this.fechaFinAtencion = builder.fechaFinAtencion;
     }
 
     public Long getFilaId() {
@@ -111,5 +111,72 @@ public class FilaAtencionResponseDto {
 
     public void setFechaFinAtencion(LocalDateTime fechaFinAtencion) {
         this.fechaFinAtencion = fechaFinAtencion;
+    }
+
+    public static class Builder {
+        private Long filaId;
+        private Long citaId;
+        private PersonaResponse persona;
+        private Long etapaId;
+        private String nombreEtapa;
+        private EstadoFila estado;
+        private String usuarioAsignado;
+        private LocalDateTime fechaLlegada;
+        private LocalDateTime fechaInicioAtencion;
+        private LocalDateTime fechaFinAtencion;
+
+        public Builder filaId(Long filaId) {
+            this.filaId = filaId;
+            return this;
+        }
+
+        public Builder citaId(Long citaId) {
+            this.citaId = citaId;
+            return this;
+        }
+
+        public Builder persona(PersonaResponse persona) {
+            this.persona = persona;
+            return this;
+        }
+
+        public Builder etapaId(Long etapaId) {
+            this.etapaId = etapaId;
+            return this;
+        }
+
+        public Builder nombreEtapa(String nombreEtapa) {
+            this.nombreEtapa = nombreEtapa;
+            return this;
+        }
+
+        public Builder estado(EstadoFila estado) {
+            this.estado = estado;
+            return this;
+        }
+
+        public Builder usuarioAsignado(String usuarioAsignado) {
+            this.usuarioAsignado = usuarioAsignado;
+            return this;
+        }
+
+        public Builder fechaLlegada(LocalDateTime fechaLlegada) {
+            this.fechaLlegada = fechaLlegada;
+            return this;
+        }
+
+        public Builder fechaInicioAtencion(LocalDateTime fechaInicioAtencion) {
+            this.fechaInicioAtencion = fechaInicioAtencion;
+            return this;
+        }
+
+        public Builder fechaFinAtencion(LocalDateTime fechaFinAtencion) {
+            this.fechaFinAtencion = fechaFinAtencion;
+            return this;
+        }
+
+        public FilaAtencionResponseDto build() {
+            return new FilaAtencionResponseDto(this);
+        }
     }
 }

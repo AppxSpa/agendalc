@@ -8,8 +8,6 @@ public class CitaRequest {
     private Long idSaludFormulario;
     private Long idSolicitud;
 
-    
-
     public Integer getRut() {
         return rut;
     }

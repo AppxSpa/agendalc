@@ -20,7 +20,8 @@ public class UsuarioEtapaServiceImpl implements UsuarioEtapaService {
     private final UsuarioEtapaRepository usuarioEtapaRepository;
     private final EtapaTramiteRepository etapaTramiteRepository;
 
-    public UsuarioEtapaServiceImpl(UsuarioEtapaRepository usuarioEtapaRepository, EtapaTramiteRepository etapaTramiteRepository) {
+    public UsuarioEtapaServiceImpl(UsuarioEtapaRepository usuarioEtapaRepository,
+            EtapaTramiteRepository etapaTramiteRepository) {
         this.usuarioEtapaRepository = usuarioEtapaRepository;
         this.etapaTramiteRepository = etapaTramiteRepository;
     }
@@ -53,7 +54,8 @@ public class UsuarioEtapaServiceImpl implements UsuarioEtapaService {
     @Transactional
     public UsuarioEtapaResponseDto save(UsuarioEtapaRequestDto requestDto) {
         EtapaTramite etapaTramite = etapaTramiteRepository.findById(requestDto.getEtapaTramiteId())
-                .orElseThrow(() -> new NotFounException("Etapa de trámite no encontrada con ID: " + requestDto.getEtapaTramiteId()));
+                .orElseThrow(() -> new NotFounException(
+                        "Etapa de trámite no encontrada con ID: " + requestDto.getEtapaTramiteId()));
 
         UsuarioEtapa usuarioEtapa = new UsuarioEtapa();
         usuarioEtapa.setUsuarioId(requestDto.getUsuarioId());

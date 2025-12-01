@@ -11,9 +11,12 @@ import com.agendalc.agendalc.dto.MovimientosDto;
 import com.agendalc.agendalc.dto.ObservacionesDto;
 import com.agendalc.agendalc.dto.PersonaResponse;
 import com.agendalc.agendalc.dto.RechazoDto;
+import com.agendalc.agendalc.dto.SolicitudRequest;
 import com.agendalc.agendalc.dto.SolicitudResponse;
 import com.agendalc.agendalc.dto.SolicitudResponseList;
 import com.agendalc.agendalc.entities.Documento;
+import com.agendalc.agendalc.entities.SolcitudRechazo;
+import com.agendalc.agendalc.entities.Tramite;
 import com.agendalc.agendalc.entities.MovimientoSolicitud;
 import com.agendalc.agendalc.entities.ObservacionSolicitud;
 import com.agendalc.agendalc.entities.Solicitud;
@@ -112,10 +115,10 @@ public class SolicitudMapper {
     }
 
     private DocumentosDto documentoToDto(Documento doc) {
-        String nombreDocumento = doc.getDocumentosTramite() != null ? doc.getDocumentosTramite().getNombreDocumento() : doc.getNombreArchivo();
+        String nombreDocumento = doc.getDocumentosTramite() != null ? doc.getDocumentosTramite().getNombreDocumento()
+                : doc.getNombreArchivo();
         return new DocumentosDto(doc.getId(), doc.getPathStorage(), nombreDocumento, doc.isAprobado());
     }
-
 
     public SolicitudResponse mapSolicitudResponse(Solicitud solicitud) {
         return new SolicitudResponse(
@@ -126,7 +129,7 @@ public class SolicitudMapper {
                 solicitud.getEstado().toString());
     }
 
-     public MovimientoSolicitudRequest mapMovimientoSolicitudRequest(Long idSolicitud, Integer tipMovimiento,
+    public MovimientoSolicitudRequest mapMovimientoSolicitudRequest(Long idSolicitud, Integer tipMovimiento,
             String usuario, String asignadoA) {
         MovimientoSolicitudRequest movimiento = new MovimientoSolicitudRequest();
         movimiento.setIdSolicitud(idSolicitud);
@@ -135,6 +138,20 @@ public class SolicitudMapper {
         movimiento.setAsignadoA(asignadoA);
 
         return movimiento;
+    }
+
+    public Solicitud toEntity(SolicitudRequest request, Tramite tramite) {
+        Solicitud solicitud = new Solicitud();
+        solicitud.setRut(request.getRut());
+        solicitud.setTramite(tramite);
+        return solicitud;
+    }
+
+    public SolcitudRechazo toRechazoEntity(String motivoRechazo, Solicitud solicitud) {
+        SolcitudRechazo solcitudRehazo = new SolcitudRechazo();
+        solcitudRehazo.setMotivoRechazo(motivoRechazo);
+        solcitudRehazo.setSolicitud(solicitud);
+        return solcitudRehazo;
     }
 
 }

@@ -42,11 +42,13 @@ public class TramiteEtapaId implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TramiteEtapaId that = (TramiteEtapaId) o;
         return Objects.equals(tramiteId, that.tramiteId) &&
-               Objects.equals(etapaTramiteId, that.etapaTramiteId);
+                Objects.equals(etapaTramiteId, that.etapaTramiteId);
     }
 
     @Override

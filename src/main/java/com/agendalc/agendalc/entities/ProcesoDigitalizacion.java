@@ -39,7 +39,6 @@ public class ProcesoDigitalizacion {
         this.fechaProceso = LocalDateTime.now();
     }
 
-  
     public Long getId() {
         return id;
     }

@@ -1,7 +1,7 @@
 package com.agendalc.agendalc.dto;
 
 public class UsuarioEtapaResponseDto {
-    
+
     private Long id;
     private String usuarioId;
     private String nombreUsuario;
@@ -11,7 +11,8 @@ public class UsuarioEtapaResponseDto {
     public UsuarioEtapaResponseDto() {
     }
 
-    public UsuarioEtapaResponseDto(Long id, String usuarioId, String nombreUsuario, Long etapaTramiteId, String nombreEtapa) {
+    public UsuarioEtapaResponseDto(Long id, String usuarioId, String nombreUsuario, Long etapaTramiteId,
+            String nombreEtapa) {
         this.id = id;
         this.usuarioId = usuarioId;
         this.nombreUsuario = nombreUsuario;

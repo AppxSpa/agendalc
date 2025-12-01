@@ -9,6 +9,16 @@ public class AppProperties {
 
     private String uploadDir;
 
+    private String plataformaUrl;
+
+    public String getPlataformaUrl() {
+        return plataformaUrl;
+    }
+
+    public void setPlataformaUrl(String plataformaUrl) {
+        this.plataformaUrl = plataformaUrl;
+    }
+
     public String getUploadDir() {
         return uploadDir;
     }

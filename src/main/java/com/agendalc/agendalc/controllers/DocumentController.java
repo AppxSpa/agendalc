@@ -43,7 +43,6 @@ public class DocumentController {
         }
     }
 
-
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getFile(@PathVariable String filename) throws MalformedURLException {
         Path filePath = Paths.get(appProperties.getUploadDir()).resolve(filename);

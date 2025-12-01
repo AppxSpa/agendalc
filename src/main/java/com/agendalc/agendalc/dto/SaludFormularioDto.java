@@ -29,8 +29,6 @@ public class SaludFormularioDto {
     private SaludConduccionDto conduccion;
     private String firma;
 
-    
-
     public SaludPersonalesDto getPersonales() {
         return personales;
     }

@@ -1,25 +1,18 @@
 package com.agendalc.agendalc.services;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.agendalc.agendalc.dto.CitaAsociadaDto;
-import com.agendalc.agendalc.dto.DocumentosSubidosRequest;
+
 import com.agendalc.agendalc.dto.MovimientoSolicitudRequest;
 import com.agendalc.agendalc.dto.SolicitudRequest;
 import com.agendalc.agendalc.dto.SolicitudResponse;
 import com.agendalc.agendalc.dto.SolicitudResponseList;
 import com.agendalc.agendalc.entities.Cita;
-import com.agendalc.agendalc.entities.Documento;
-import com.agendalc.agendalc.entities.DocumentosEliminados;
-import com.agendalc.agendalc.entities.DocumentosTramite;
 import com.agendalc.agendalc.entities.MovimientoSolicitud;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.SolcitudRechazo;
@@ -28,60 +21,50 @@ import com.agendalc.agendalc.entities.Tramite;
 import com.agendalc.agendalc.entities.MovimientoSolicitud.TipoMovimiento;
 import com.agendalc.agendalc.entities.Solicitud.EstadoSolicitud;
 import com.agendalc.agendalc.repositories.CitaRepository;
-import com.agendalc.agendalc.repositories.DocumentosEliminadosRepository;
-import com.agendalc.agendalc.repositories.DocumentosTramiteRepository;
 import com.agendalc.agendalc.repositories.SaludFormularioRepository;
 import com.agendalc.agendalc.repositories.SolicitudRechazoRepository;
 import com.agendalc.agendalc.repositories.SolicitudRepository;
 import com.agendalc.agendalc.repositories.TramiteRepository;
-import com.agendalc.agendalc.repositories.DocumentoRepository;
-import com.agendalc.agendalc.services.interfaces.ApiMailService;
-import com.agendalc.agendalc.services.interfaces.ApiPersonaService;
-import com.agendalc.agendalc.services.interfaces.ArchivoService;
 import com.agendalc.agendalc.services.interfaces.MovimientoSolicitudService;
+import com.agendalc.agendalc.services.interfaces.NotificacionService;
+import com.agendalc.agendalc.services.interfaces.SolicitudDocumentoService;
 import com.agendalc.agendalc.services.interfaces.SolicitudService;
+import com.agendalc.agendalc.services.interfaces.SolicitudResponseTransformer;
 import com.agendalc.agendalc.services.mappers.SolicitudMapper;
 import com.agendalc.agendalc.utils.RepositoryUtils;
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class SolicitudServiceImpl implements SolicitudService {
 
     private final SolicitudRepository solicitudRepository;
     private final TramiteRepository tramiteRepository;
-    private final ArchivoService archivoService;
-    private final DocumentosTramiteRepository documentosTramiteRepository;
     private final MovimientoSolicitudService movimientoSolicitudService;
-    private final DocumentoRepository documentoRepository;
-    private final DocumentosEliminadosRepository documentosEliminadosRepository;
     private final SaludFormularioRepository saludFormularioRepository;
     private final CitaRepository citaRepository;
     private final SolicitudMapper solicitudMapper;
-    private final ApiMailService apiMailService;
-    private final ApiPersonaService apiPersonaService; // Añadido
-    private final SolicitudRechazoRepository solicitudRechazoRepository; // Añadido
+    private final NotificacionService notificacionService;
+    private final SolicitudRechazoRepository solicitudRechazoRepository;
+    private final SolicitudResponseTransformer responseTransformer;
+    private final SolicitudDocumentoService solicitudDocumentoService;
 
-    public SolicitudServiceImpl(SolicitudRepository solicitudCitaRepository, ArchivoService archivoService,
-            TramiteRepository tramiteRepository, DocumentosTramiteRepository documentosTramiteRepository,
+    public SolicitudServiceImpl(SolicitudRepository solicitudCitaRepository,
+            TramiteRepository tramiteRepository,
             MovimientoSolicitudService movimientoSolicitudService,
-            DocumentosEliminadosRepository documentosEliminadosRepository,
             SaludFormularioRepository saludFormularioRepository, CitaRepository citaRepository,
-            SolicitudMapper solicitudMapper, DocumentoRepository documentoRepository, ApiMailService apiMailService,
-            ApiPersonaService apiPersonaService,
-            SolicitudRechazoRepository solicitudRechazoRepository) { // Añadido al constructor
+            SolicitudMapper solicitudMapper, NotificacionService notificacionService,
+            SolicitudRechazoRepository solicitudRechazoRepository,
+            SolicitudResponseTransformer responseTransformer,
+            SolicitudDocumentoService solicitudDocumentoService) {
         this.solicitudRepository = solicitudCitaRepository;
         this.tramiteRepository = tramiteRepository;
-        this.archivoService = archivoService;
-        this.documentosTramiteRepository = documentosTramiteRepository;
         this.movimientoSolicitudService = movimientoSolicitudService;
-        this.documentosEliminadosRepository = documentosEliminadosRepository;
-        this.saludFormularioRepository = saludFormularioRepository; // Asignado
+        this.saludFormularioRepository = saludFormularioRepository;
         this.citaRepository = citaRepository;
         this.solicitudMapper = solicitudMapper;
-        this.documentoRepository = documentoRepository;
-        this.apiMailService = apiMailService;
-        this.apiPersonaService = apiPersonaService;
+        this.notificacionService = notificacionService;
         this.solicitudRechazoRepository = solicitudRechazoRepository;
+        this.responseTransformer = responseTransformer;
+        this.solicitudDocumentoService = solicitudDocumentoService;
     }
 
     @Override
@@ -89,10 +72,9 @@ public class SolicitudServiceImpl implements SolicitudService {
         List<Solicitud> solicitudes = solicitudRepository
                 .findByFechaSolicitudYearWithMovimientosOrdered(year);
 
-        return solicitudMapper.mapToSolicitudResponseList(solicitudes).stream()
+        return responseTransformer.transform(solicitudes).stream()
                 .filter(sol -> sol.getEstadoSolicitud().equals(EstadoSolicitud.PENDIENTE.toString()))
                 .toList();
-
     }
 
     @Transactional
@@ -117,112 +99,58 @@ public class SolicitudServiceImpl implements SolicitudService {
     public void finishSolicitudById(Long idSolicitud, String loginUsuario) {
         Solicitud solicitud = getSolicitudById(idSolicitud);
 
-        MovimientoSolicitudRequest movimiento = solicitudMapper.mapMovimientoSolicitudRequest(idSolicitud, 6,
-                loginUsuario,
-                null);
+        actualizarEstadoYCrearMovimiento(solicitud, EstadoSolicitud.FINALIZADA, loginUsuario,
+                TipoMovimiento.FINALIZACION);
 
-        movimientoSolicitudService.createMovimientoSolicitud(movimiento);
-
-        solicitud.setEstado(EstadoSolicitud.FINALIZADA);
         solicitudRepository.save(solicitud);
     }
 
     @Override
     public List<SolicitudResponseList> getSolicitudesByRut(Integer rut) {
         List<Solicitud> solicitudes = solicitudRepository.findByRut(rut);
-        List<SolicitudResponseList> responseList = solicitudMapper.mapToSolicitudResponseList(solicitudes);
-
-        // Create a map for quick lookup
-        Map<Long, SolicitudResponseList> responseMap = new HashMap<>();
-        for (SolicitudResponseList res : responseList) {
-            responseMap.put(res.getIdSolicitud(), res);
-        }
-
-        for (Solicitud solicitud : solicitudes) {
-            citaRepository.findBySolicitud(solicitud).ifPresent(cita -> {
-                SolicitudResponseList dto = responseMap.get(solicitud.getIdSolicitud());
-                if (dto != null) {
-                    CitaAsociadaDto citaDto = new CitaAsociadaDto(
-                            cita.getIdCita(),
-                            cita.getFechaHora(),
-                            cita.getAgenda().getIdAgenda());
-                    dto.setCita(citaDto);
-                }
-            });
-        }
-
-        return responseList;
+        return responseTransformer.transform(solicitudes);
     }
 
     @Override
     @Transactional
     public SolicitudResponse createSolicitud(SolicitudRequest request) throws IOException {
         Tramite tramite = getTramiteById(request.getIdTramite());
+        Solicitud solicitud = solicitudMapper.toEntity(request, tramite);
 
-        Solicitud solicitud = new Solicitud();
-        solicitud.setRut(request.getRut());
-        solicitud.setTramite(tramite);
-
-        // Lógica para asociar SaludFormulario
-        if (request.getIdSaludFormulario() != null) {
-            SaludFormulario saludFormulario = saludFormularioRepository.findById(request.getIdSaludFormulario())
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "SaludFormulario no encontrado con id: " + request.getIdSaludFormulario()));
-            solicitud.setSaludFormulario(saludFormulario);
-        }
+        asociarSaludFormulario(solicitud, request.getIdSaludFormulario());
 
         MovimientoSolicitud primerMovimiento = firstMovement(solicitud, TipoMovimiento.CREACION);
         solicitud.addMovimiento(primerMovimiento);
 
-        // Primero guardamos la solicitud para obtener un ID
         Solicitud savedSolicitud = solicitudRepository.save(solicitud);
 
         if (request.getDocumentos() != null && !request.getDocumentos().isEmpty()) {
-            for (DocumentosSubidosRequest docRequest : request.getDocumentos()) {
-                MultipartFile file = docRequest.getFile();
-
-                if (file != null && !file.isEmpty()) {
-                    DocumentosTramite tipoDocumentoRequerido = documentosTramiteRepository
-                            .findById(docRequest.getIdTipoDocumento())
-                            .orElseThrow(() -> new EntityNotFoundException("Tipo de documento requerido con ID "
-                                    + docRequest.getIdTipoDocumento() + " no encontrado."));
-
-                    String nombreGuardado = archivoService.guardarArchivo(file);
-                    Path rutaCompleta = archivoService.getRutaCompletaArchivo(nombreGuardado);
-
-                    Documento documento = new Documento();
-                    documento.setRutPersona(savedSolicitud.getRut().toString());
-                    documento.setTramite(tramite);
-                    documento.setDocumentosTramite(tipoDocumentoRequerido);
-                    documento.setNombreArchivo(file.getOriginalFilename());
-                    documento.setPathStorage(rutaCompleta.toString());
-                    documento.setTipoMime(file.getContentType());
-                    documento.setOrigenId(savedSolicitud.getIdSolicitud());
-                    documento.setOrigenTipo("SOLICITUD");
-
-                    documentoRepository.save(documento);
-                }
-            }
+            solicitudDocumentoService.guardarDocumentosNuevos(savedSolicitud, tramite, request.getDocumentos());
         }
 
-        // Asociar la solicitud a la cita, si se proporciona idCita
-        if (request.getIdCita() != null) {
-            Cita cita = citaRepository.findById(request.getIdCita())
-                    .orElseThrow(
-                            () -> new EntityNotFoundException("Cita no encontrada con id: " + request.getIdCita()));
-            cita.setSolicitud(savedSolicitud);
-            citaRepository.save(cita);
-        }
+        asociarCita(savedSolicitud, request.getIdCita());
 
-        Map<String, Object> variables = Map.of(
-                "nombres", getNombresPersonaPorSolicitud(savedSolicitud),
-                "urlPlataforma", "https://dev.appx.cl/");
-        // Enviar correo de notificación
-        apiMailService.sendEmail(getEmailPersonaPorSolicitud(savedSolicitud), "Solicitud creada",
-                "solicitud-template", variables);
+        notificacionService.enviarNotificacionSolicitudCreada(savedSolicitud);
 
         return solicitudMapper.mapSolicitudResponse(savedSolicitud);
+    }
 
+    private void asociarSaludFormulario(Solicitud solicitud, Long idSaludFormulario) {
+        if (idSaludFormulario != null) {
+            SaludFormulario saludFormulario = RepositoryUtils.findOrThrow(
+                    saludFormularioRepository.findById(idSaludFormulario),
+                    "SaludFormulario no encontrado con id: " + idSaludFormulario);
+            solicitud.setSaludFormulario(saludFormulario);
+        }
+    }
+
+    private void asociarCita(Solicitud solicitud, Long idCita) {
+        if (idCita != null) {
+            Cita cita = RepositoryUtils.findOrThrow(citaRepository.findById(idCita),
+                    "Cita no encontrada con id: " + idCita);
+            cita.setSolicitud(solicitud);
+            citaRepository.save(cita);
+        }
     }
 
     private Tramite getTramiteById(Long idTramite) {
@@ -236,19 +164,15 @@ public class SolicitudServiceImpl implements SolicitudService {
                 tipo,
                 null,
                 null);
-
     }
 
     @Override
     public List<SolicitudResponseList> getSolicitudesByRutFunc(Integer rut) {
         List<Solicitud> solicitudes = solicitudRepository.findByAsignadoA(rut.toString());
-
-        return solicitudMapper.mapToSolicitudResponseList(solicitudes);
-
+        return responseTransformer.transform(solicitudes);
     }
 
     private Solicitud getSolicitudById(Long idSolicitud) {
-
         return RepositoryUtils.findOrThrow(solicitudRepository.findById(idSolicitud),
                 String.format("No se encontró la solicitud %d", idSolicitud));
     }
@@ -256,29 +180,11 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Override
     public List<SolicitudResponseList> getSolicitudesBetweenDatesAndState(LocalDate fechaInicio, LocalDate fechaFin,
             EstadoSolicitud estadoSolicitud) {
-
         List<Solicitud> solicitudes = solicitudRepository.findByFechaSolicitudBetween(fechaInicio, fechaFin);
 
-        List<SolicitudResponseList> responseList = solicitudMapper.mapToSolicitudResponseList(solicitudes);
+        solicitudes = filtrarPorEstadoSolicitud(estadoSolicitud, solicitudes);
 
-        for (SolicitudResponseList response : responseList) {
-            String estadoActualStr = response.getEstadoSolicitud();
-            EstadoSolicitud estadoActual = EstadoSolicitud.valueOf(estadoActualStr);
-
-            switch (estadoActual) {
-                case ASIGNADA, EN_PROCESO, OBSERVADA, PENDIENTE, DERIVADA:
-                    response.setEstadoSolicitud("En Revision");
-                    break;
-                case RESPONDIDA, APROBADA:
-                    response.setEstadoSolicitud("FINALIZADA");
-                    break;
-                default:
-                    // No cambia el estado si no coincide con los grupos definidos
-                    break;
-            }
-        }
-
-        return responseList;
+        return responseTransformer.transform(solicitudes);
     }
 
     @Override
@@ -288,78 +194,43 @@ public class SolicitudServiceImpl implements SolicitudService {
 
         Solicitud solicitud = getSolicitudById(idSolicitud);
 
-        Documento docToReplace = RepositoryUtils.findOrThrow(documentoRepository.findById(idDocumento),
-                String.format("Documento con id %d no encontrado.", idDocumento));
-
-        // Verify the document belongs to the solicitud
-        if (!docToReplace.getOrigenId().equals(idSolicitud) || !"SOLICITUD".equals(docToReplace.getOrigenTipo())) {
-            throw new SecurityException("El documento no pertenece a la solicitud especificada.");
-        }
-
-        String oldPath = docToReplace.getPathStorage();
-
-        String nombreGuardado = archivoService.guardarArchivo(file);
-        Path rutaCompleta = archivoService.getRutaCompletaArchivo(nombreGuardado);
+        solicitudDocumentoService.reemplazarDocumento(idSolicitud, idDocumento, file);
 
         solicitud.setEstado(EstadoSolicitud.RESPONDIDA);
 
-        documentosEliminadosRepository.save(new DocumentosEliminados(oldPath, idSolicitud, idDocumento));
-
-        docToReplace.setPathStorage(rutaCompleta.toString());
-        docToReplace.setNombreArchivo(file.getOriginalFilename());
-        docToReplace.setTipoMime(file.getContentType());
-
-        documentoRepository.save(docToReplace);
-
-        MovimientoSolicitudRequest movimiento = solicitudMapper.mapMovimientoSolicitudRequest(idSolicitud, 7,
-                loginUsuario,
-                null);
-
-        movimientoSolicitudService.createMovimientoSolicitud(movimiento);
+        registrarMovimientoReemplazo(idSolicitud, loginUsuario);
 
         solicitudRepository.save(solicitud);
     }
 
-    @Override
-    public SolicitudResponse aprobeSolicitud(Long idSolicitud, String loginUsuario) {
-
-        Solicitud solicitud = getSolicitudById(idSolicitud);
-
-        solicitud.setEstado(EstadoSolicitud.APROBADA);
-
-        MovimientoSolicitudRequest movimiento = solicitudMapper.mapMovimientoSolicitudRequest(idSolicitud, 6,
+    private void registrarMovimientoReemplazo(Long idSolicitud, String loginUsuario) {
+        MovimientoSolicitudRequest movimiento = solicitudMapper.mapMovimientoSolicitudRequest(idSolicitud,
+                TipoMovimiento.OBSERVACION_RESPONDIDA.ordinal(),
                 loginUsuario,
                 null);
-
         movimientoSolicitudService.createMovimientoSolicitud(movimiento);
+    }
+
+    @Override
+    public SolicitudResponse aprobeSolicitud(Long idSolicitud, String loginUsuario) {
+        Solicitud solicitud = getSolicitudById(idSolicitud);
+
+        actualizarEstadoYCrearMovimiento(solicitud, EstadoSolicitud.APROBADA, loginUsuario, TipoMovimiento.APROBACION);
 
         solicitud = solicitudRepository.save(solicitud);
 
-        Map<String, Object> variables = Map.of(
-                "nombres", getNombresPersonaPorSolicitud(solicitud),
-                "idSolicitud", solicitud.getIdSolicitud(),
-                "urlPlataforma", "https://dev.appx.cl/");
-
-        apiMailService.sendEmail(getEmailPersonaPorSolicitud(solicitud), "Solicitud Aprobada",
-                "solicitud-aprobada-template", variables);
+        notificacionService.enviarNotificacionSolicitudAprobada(solicitud);
 
         return solicitudMapper.mapSolicitudResponse(solicitud);
-
     }
 
     @Override
     public SolicitudResponse rejectSolicitu(Long idSolicitud, String loginUsuario, String motivoRechazo) {
-
         Solicitud solicitud = getSolicitudById(idSolicitud);
-        solicitud.setEstado(EstadoSolicitud.RECHAZADA);
-        MovimientoSolicitudRequest movimiento = solicitudMapper.mapMovimientoSolicitudRequest(idSolicitud, 6,
-                loginUsuario,
-                null);
 
-        movimientoSolicitudService.createMovimientoSolicitud(movimiento);
+        actualizarEstadoYCrearMovimiento(solicitud, EstadoSolicitud.RECHAZADA, loginUsuario, TipoMovimiento.RECHAZO);
 
-        // Crear y guardar el registro de rechazo
-        SolcitudRechazo solcitudRehazo = toEntitySolcitudRechazo(motivoRechazo, solicitud);
+        SolcitudRechazo solcitudRehazo = solicitudMapper.toRechazoEntity(motivoRechazo, solicitud);
         solicitudRechazoRepository.save(solcitudRehazo);
 
         solicitud = solicitudRepository.save(solicitud);
@@ -367,33 +238,40 @@ public class SolicitudServiceImpl implements SolicitudService {
         return solicitudMapper.mapSolicitudResponse(solicitud);
     }
 
+    private void actualizarEstadoYCrearMovimiento(Solicitud solicitud, EstadoSolicitud nuevoEstado, String loginUsuario,
+            TipoMovimiento tipoMovimiento) {
+        solicitud.setEstado(nuevoEstado);
+
+        MovimientoSolicitudRequest movimiento = solicitudMapper.mapMovimientoSolicitudRequest(
+                solicitud.getIdSolicitud(), tipoMovimiento.ordinal(),
+                loginUsuario,
+                null);
+        movimientoSolicitudService.createMovimientoSolicitud(movimiento);
+    }
+
     @Override
     public void delteSolicitud(Long idSolicitud) {
-
-        if (!solicitudRepository.findById(idSolicitud).isPresent()) {
-            throw new EntityNotFoundException("Solicitud no encontrada con ID: " + idSolicitud);
-
-        }
-
-        solicitudRepository.deleteById(idSolicitud);
-
+        Solicitud solicitud = getSolicitudById(idSolicitud);
+        solicitudRepository.delete(solicitud);
     }
 
-    private String getEmailPersonaPorSolicitud(Solicitud solicitud) {
-        Integer rut = solicitud.getRut();
-        return apiPersonaService.getPersonaInfo(rut).getEmail();
-    }
+    private List<Solicitud> filtrarPorEstadoSolicitud(EstadoSolicitud estadoSolicitud, List<Solicitud> solicitudes) {
 
-    private String getNombresPersonaPorSolicitud(Solicitud solicitud) {
-        Integer rut = solicitud.getRut();
-        return apiPersonaService.getPersonaInfo(rut).getNombres();
-    }
+        String strEstado = estadoSolicitud != null ? estadoSolicitud.toString() : null;
 
-    private SolcitudRechazo toEntitySolcitudRechazo(String motivoRechazo, Solicitud solicitud) {
-        SolcitudRechazo solcitudRehazo = new SolcitudRechazo();
-        solcitudRehazo.setMotivoRechazo(motivoRechazo);
-        solcitudRehazo.setSolicitud(solicitud);
-        return solcitudRehazo;
-    }
+        return switch (strEstado) {
+            case "FINALIZADA" -> solicitudes.stream()
+                    .filter(sol -> sol.getEstado().equals(EstadoSolicitud.APROBADA)
+                            || sol.getEstado().equals(EstadoSolicitud.RECHAZADA)
+                            || sol.getEstado().equals(EstadoSolicitud.FINALIZADA))
+                    .toList();
 
+            default -> solicitudes.stream()
+                    .filter(sol -> !sol.getEstado().equals(EstadoSolicitud.APROBADA)
+                            || !sol.getEstado().equals(EstadoSolicitud.RECHAZADA)
+                            || !sol.getEstado().equals(EstadoSolicitud.FINALIZADA))
+                    .toList();
+        };
+
+    }
 }

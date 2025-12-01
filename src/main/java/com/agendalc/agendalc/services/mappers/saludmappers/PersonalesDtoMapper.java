@@ -8,7 +8,7 @@ import com.agendalc.agendalc.entities.SaludPersonales;
 @Component
 public class PersonalesDtoMapper {
 
-     public SaludPersonalesDto toPersonalesDto(SaludPersonales p) {
+    public SaludPersonalesDto toPersonalesDto(SaludPersonales p) {
         if (p == null)
             return null;
         SaludPersonalesDto pd = new SaludPersonalesDto();
@@ -24,6 +24,5 @@ public class PersonalesDtoMapper {
         }
         return pd;
     }
-
 
 }

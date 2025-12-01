@@ -1,6 +1,5 @@
 package com.agendalc.agendalc.entities;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -96,7 +95,5 @@ public class SaludLicenciasOtorgadas {
     public void setTiposLicencias(String tiposLicencias) {
         this.tiposLicencias = tiposLicencias;
     }
-
-   
 
 }

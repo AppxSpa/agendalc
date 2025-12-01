@@ -29,7 +29,8 @@ public class MovimientoSolicitudServiceImpl implements MovimientoSolicitudServic
 
         Solicitud solicitud = getSolicitud(request.getIdSolicitud());
 
-        TipoMovimiento tipoMovimiento = getTipoMovimiento(request.getTipoMovimiento());
+        // Usamos el método estático del enumerador para la conversión
+        TipoMovimiento tipoMovimiento = TipoMovimiento.fromInteger(request.getTipoMovimiento());
 
         String loginUsuario = request.getLoginUsuario();
 
@@ -44,21 +45,6 @@ public class MovimientoSolicitudServiceImpl implements MovimientoSolicitudServic
     private Solicitud getSolicitud(Long idSolicitud) {
         return solicitudRepository.findById(idSolicitud)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
-    }
-
-    private TipoMovimiento getTipoMovimiento(Integer tipoMovimiento) {
-        return switch (tipoMovimiento) {
-            case 0 -> TipoMovimiento.CREACION;
-            case 1 -> TipoMovimiento.ASIGNACION;
-            case 2 -> TipoMovimiento.DERIVACION;
-            case 3 -> TipoMovimiento.APROBACION;
-            case 4 -> TipoMovimiento.RECHAZO;
-            case 5 -> TipoMovimiento.OBSERVACION_AGREGADA;
-            case 6 -> TipoMovimiento.FINALIZACION;
-            case 7 -> TipoMovimiento.OBSERVACION_RESPONDIDA;
-            
-            default -> throw new IllegalArgumentException("Tipo de movimiento no válido");
-        };
     }
 
     private MovimientoSolicitud convertEntity(Solicitud solicitud, TipoMovimiento tipo, String responsable,

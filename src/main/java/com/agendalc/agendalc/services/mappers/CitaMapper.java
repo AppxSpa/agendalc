@@ -1,9 +1,13 @@
 package com.agendalc.agendalc.services.mappers;
 
 import com.agendalc.agendalc.dto.CitaDto;
+import com.agendalc.agendalc.dto.CitaRequest;
 import com.agendalc.agendalc.dto.SolicitudAsociadaDto;
 import com.agendalc.agendalc.dto.TramiteResponse;
+import com.agendalc.agendalc.entities.Agenda;
+import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
+import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
 import com.agendalc.agendalc.entities.Tramite;
 
@@ -60,5 +64,16 @@ public class CitaMapper {
         dto.setRequiereSolicitud(tramite.isRequiereSolicitud());
         // Mapear otros campos si es necesario
         return dto;
+    }
+
+    public Cita toEntity(CitaRequest request, Agenda agenda, BloqueHorario bloqueHorario,
+            SaludFormulario saludFormulario, Solicitud solicitud) {
+        Cita cita = new Cita();
+        cita.setRut(request.getRut());
+        cita.setAgenda(agenda);
+        cita.setBloqueHorario(bloqueHorario);
+        cita.setSaludFormulario(saludFormulario);
+        cita.setSolicitud(solicitud);
+        return cita;
     }
 }

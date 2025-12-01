@@ -9,7 +9,7 @@ import com.agendalc.agendalc.entities.SaludInmunologico;
 @Component
 public class InmunoMaper {
 
-     public void mapInmunologico(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapInmunologico(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getInmunologico() == null)
             return;
         SaludInmunologico i = new SaludInmunologico();

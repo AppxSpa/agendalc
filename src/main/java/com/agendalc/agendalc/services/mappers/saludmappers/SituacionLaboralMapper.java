@@ -9,7 +9,7 @@ import com.agendalc.agendalc.entities.SaludSituacionLaboral;
 @Component
 public class SituacionLaboralMapper {
 
-     public void mapSituacionLaboral(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapSituacionLaboral(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getSituacionLaboral() == null)
             return;
         SaludSituacionLaboral s = new SaludSituacionLaboral();
@@ -24,6 +24,5 @@ public class SituacionLaboralMapper {
         s.setFormulario(f);
         f.setSituacionLaboral(s);
     }
-
 
 }

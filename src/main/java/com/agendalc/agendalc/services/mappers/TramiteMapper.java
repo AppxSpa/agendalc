@@ -32,7 +32,7 @@ public class TramiteMapper {
 
     }
 
-     public Tramite convertToEntity(TramiteRequest request) {
+    public Tramite convertToEntity(TramiteRequest request) {
         Tramite tramite = new Tramite();
         tramite.setNombre(request.getNombre().toUpperCase());
         tramite.setDescripcion(request.getDescripcion());

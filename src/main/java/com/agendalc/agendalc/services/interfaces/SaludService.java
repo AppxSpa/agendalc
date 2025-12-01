@@ -12,6 +12,6 @@ public interface SaludService {
 
     Optional<SaludFormularioDto> findByRut(String rut);
 
-    List<DeclaracionSaludResponse> findDeclaracionesByRut(String rut);
+    List<DeclaracionSaludResponse> findDeclaracionesByRut(Integer rut);
 
 }

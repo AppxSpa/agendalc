@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,6 +42,9 @@ public class Cita {
     @OneToOne
     @JoinColumn(name = "id_solicitud", nullable = true)
     private Solicitud solicitud;
+
+    @OneToOne(mappedBy = "cita", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private AsistenciaCita asistencia;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
@@ -86,6 +90,14 @@ public class Cita {
         this.bloqueHorario = bloqueHorario;
     }
 
+    public AsistenciaCita getAsistencia() {
+        return asistencia;
+    }
+
+    public void setAsistencia(AsistenciaCita asistencia) {
+        this.asistencia = asistencia;
+    }
+
     public LocalDate getFechaAgenda() {
         return agenda.getFecha();
     }
@@ -116,26 +128,22 @@ public class Cita {
         return saludFormulario;
     }
 
-        public void setSaludFormulario(SaludFormulario saludFormulario) {
+    public void setSaludFormulario(SaludFormulario saludFormulario) {
 
-            this.saludFormulario = saludFormulario;
-
-        }
-
-    
-
-        public Solicitud getSolicitud() {
-
-            return solicitud;
-
-        }
-
-    
-
-        public void setSolicitud(Solicitud solicitud) {
-
-            this.solicitud = solicitud;
-
-        }
+        this.saludFormulario = saludFormulario;
 
     }
+
+    public Solicitud getSolicitud() {
+
+        return solicitud;
+
+    }
+
+    public void setSolicitud(Solicitud solicitud) {
+
+        this.solicitud = solicitud;
+
+    }
+
+}

@@ -9,7 +9,7 @@ import com.agendalc.agendalc.entities.SaludRespiratorio;
 @Component
 public class RespiratorioMapper {
 
-     public void mapRespiratorio(SaludFormularioDto dto, SaludFormulario f) {
+    public void mapRespiratorio(SaludFormularioDto dto, SaludFormulario f) {
         if (dto.getRespiratorio() == null)
             return;
         SaludRespiratorio r = new SaludRespiratorio();

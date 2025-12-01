@@ -18,13 +18,10 @@ public class SaludPersonales {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-
     @OneToOne
     @JoinColumn(name = "id_formulario")
     private SaludFormulario formulario;
 
-    
     @Enumerated(EnumType.STRING)
     private Genero genero;
 
@@ -37,8 +34,6 @@ public class SaludPersonales {
         FEMENINO,
         OTRO
     }
-
-    
 
     public SaludFormulario getFormulario() {
         return formulario;
@@ -64,7 +59,6 @@ public class SaludPersonales {
         this.id = id;
     }
 
-   
     public Integer getEdad() {
         return edad;
     }

@@ -86,8 +86,6 @@ public class SaludFormulario {
     @OneToOne(mappedBy = "formulario", cascade = CascadeType.ALL)
     private SaludFirma firma;
 
-    
-
     public SaludCardio getCardio() {
         return cardio;
     }

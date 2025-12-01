@@ -26,7 +26,8 @@ public class FilaAtencionController {
 
     @PostMapping("/citas/{citaId}/iniciar")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')") // Idealmente un rol 'RECEPCION'
-    public ResponseEntity<List<FilaAtencionResponseDto>> iniciarProceso(@PathVariable Long citaId, @org.springframework.web.bind.annotation.RequestBody com.agendalc.agendalc.dto.IniciarProcesosRequest request) {
+    public ResponseEntity<List<FilaAtencionResponseDto>> iniciarProceso(@PathVariable Long citaId,
+            @org.springframework.web.bind.annotation.RequestBody com.agendalc.agendalc.dto.IniciarProcesosRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(filaAtencionService.iniciarProceso(citaId, request));
     }
 

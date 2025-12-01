@@ -26,8 +26,6 @@ public class TramiteEtapa {
     @Column(name = "orden")
     private int orden;
 
-   
-
     // Getters and Setters
     public TramiteEtapaId getId() {
         return id;

@@ -11,15 +11,19 @@ public class CitaDto {
     private LocalDate fechaHora;
     private SolicitudAsociadaDto solicitud;
     private TramiteResponse tramite;
+    private BloqueHorarioResponse bloqueHorario;
 
     public CitaDto(Cita cita) {
         this.idCita = cita.getIdCita();
         this.rut = cita.getRut();
         this.idAgenda = cita.getAgenda().getIdAgenda();
         this.fechaHora = cita.getAgenda().getFecha();
+        this.bloqueHorario = new BloqueHorarioResponse(
+                cita.getBloqueHorario().getIdBloque(),
+                cita.getBloqueHorario().getHoraInicio().toString(),
+                cita.getBloqueHorario().getHoraFin().toString(),
+                cita.getBloqueHorario().getCuposDisponibles());
     }
-
-    
 
     public Long getIdCita() {
         return idCita;
@@ -67,16 +71,20 @@ public class CitaDto {
 
     }
 
-
-
     public TramiteResponse getTramite() {
         return tramite;
     }
 
-
-
     public void setTramite(TramiteResponse tramite) {
         this.tramite = tramite;
+    }
+
+    public BloqueHorarioResponse getBloqueHorario() {
+        return bloqueHorario;
+    }
+
+    public void setBloqueHorario(BloqueHorarioResponse bloqueHorario) {
+        this.bloqueHorario = bloqueHorario;
     }
 
 }

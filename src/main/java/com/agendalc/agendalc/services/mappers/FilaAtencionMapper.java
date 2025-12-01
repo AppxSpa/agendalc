@@ -21,17 +21,18 @@ public class FilaAtencionMapper {
     public FilaAtencionResponseDto toResponseDto(FilaAtencion fila) {
         PersonaResponse persona = apiPersonaService.getPersonaInfo(fila.getCita().getRut());
 
-        return new FilaAtencionResponseDto(
-                fila.getId(),
-                fila.getCita().getIdCita(),
-                persona,
-                fila.getEtapaTramite().getId(),
-                fila.getEtapaTramite().getNombre(),
-                fila.getEstado(),
-                fila.getUsuarioAsignado(),
-                fila.getFechaLlegada(),
-                fila.getFechaInicioAtencion(),
-                fila.getFechaFinAtencion());
+        return new FilaAtencionResponseDto.Builder()
+                .filaId(fila.getId())
+                .citaId(fila.getCita().getIdCita())
+                .persona(persona)
+                .etapaId(fila.getEtapaTramite().getId())
+                .nombreEtapa(fila.getEtapaTramite().getNombre())
+                .estado(fila.getEstado())
+                .usuarioAsignado(fila.getUsuarioAsignado())
+                .fechaLlegada(fila.getFechaLlegada())
+                .fechaInicioAtencion(fila.getFechaInicioAtencion())
+                .fechaFinAtencion(fila.getFechaFinAtencion())
+                .build();
     }
 
     public List<FilaAtencionResponseDto> toResponseDtoList(List<FilaAtencion> filas) {
