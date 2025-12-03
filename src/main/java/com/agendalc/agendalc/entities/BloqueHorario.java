@@ -20,6 +20,9 @@ public class BloqueHorario {
     private LocalTime horaFin;
 
     @Column(nullable = false)
+    private int cuposTotales;
+
+    @Column(nullable = false)
     private int cuposDisponibles;
 
     @ManyToMany(mappedBy = "bloquesHorarios")
@@ -29,10 +32,11 @@ public class BloqueHorario {
     public BloqueHorario() {
     }
 
-    public BloqueHorario(LocalTime horaInicio, LocalTime horaFin, int cuposDisponibles) {
+    public BloqueHorario(LocalTime horaInicio, LocalTime horaFin, int cuposTotales) {
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
-        this.cuposDisponibles = cuposDisponibles;
+        this.cuposTotales = cuposTotales;
+        this.cuposDisponibles = cuposTotales;
     }
 
     public Long getIdBloque() {
@@ -65,6 +69,14 @@ public class BloqueHorario {
 
     public void setHoraFin(LocalTime horaFin) {
         this.horaFin = horaFin;
+    }
+
+    public int getCuposTotales() {
+        return cuposTotales;
+    }
+
+    public void setCuposTotales(int cuposTotales) {
+        this.cuposTotales = cuposTotales;
     }
 
     public int getCuposDisponibles() {

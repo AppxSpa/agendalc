@@ -45,6 +45,7 @@ public class BloqueHorarioServiceImpl implements BloqueHorarioService {
 
         bloqueExistente.setHoraInicio(bloqueHorarioActualizado.getHoraInicio());
         bloqueExistente.setHoraFin(bloqueHorarioActualizado.getHoraFin());
+        bloqueExistente.setCuposTotales(bloqueHorarioActualizado.getCuposTotales());
         bloqueExistente.setCuposDisponibles(bloqueHorarioActualizado.getCuposDisponibles());
 
         return bloqueHorarioRepository.save(bloqueExistente);
