@@ -1,5 +1,7 @@
 package com.agendalc.agendalc.dto;
 
+import java.util.List;
+
 public class CitaRequest {
 
     private Long idAgenda;
@@ -7,6 +9,7 @@ public class CitaRequest {
     private Long idBloqueHorario;
     private Long idSaludFormulario;
     private Long idSolicitud;
+    private List<DocumentoDto> documentos;
 
     public Integer getRut() {
         return rut;
@@ -46,6 +49,14 @@ public class CitaRequest {
 
     public void setIdSolicitud(Long idSolicitud) {
         this.idSolicitud = idSolicitud;
+    }
+
+    public List<DocumentoDto> getDocumentos() {
+        return documentos;
+    }
+
+    public void setDocumentos(List<DocumentoDto> documentos) {
+        this.documentos = documentos;
     }
 
 }

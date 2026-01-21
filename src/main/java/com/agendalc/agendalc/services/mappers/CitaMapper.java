@@ -1,7 +1,15 @@
 package com.agendalc.agendalc.services.mappers;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.agendalc.agendalc.config.AppProperties;
+import com.agendalc.agendalc.dto.BloqueHorarioResponse;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
+import com.agendalc.agendalc.dto.PersonaResponse;
 import com.agendalc.agendalc.dto.SolicitudAsociadaDto;
 import com.agendalc.agendalc.dto.TramiteResponse;
 import com.agendalc.agendalc.entities.Agenda;
@@ -9,71 +17,87 @@ import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
-import com.agendalc.agendalc.entities.Tramite;
-
-import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.agendalc.agendalc.services.interfaces.ApiPersonaService;
 
 @Component
 public class CitaMapper {
 
-    public Map<String, Object> createVariablesCorreoCita(Cita cita, String nombres) {
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("nombres", nombres);
-        variables.put("nombreTramite", cita.nombreTramite());
-        variables.put("fechaCita", cita.getFechaAgenda().toString());
-        variables.put("horaCita", cita.getHoraInicioBloqueHoraio().toString());
-        return variables;
+    private final ApiPersonaService apiPersonaService;
+    private final AppProperties appProperties;
+
+    public CitaMapper(ApiPersonaService apiPersonaService, AppProperties appProperties) {
+        this.apiPersonaService = apiPersonaService;
+        this.appProperties = appProperties;
     }
 
     public CitaDto toDto(Cita cita) {
-        CitaDto dto = new CitaDto(cita);
+        CitaDto dto = new CitaDto();
+        dto.setIdCita(cita.getIdCita());
+        dto.setRut(cita.getRut());
+
+        PersonaResponse persona = apiPersonaService.getPersonaInfo(cita.getRut());
+        if (persona != null) {
+            dto.setDv(persona.getVrut());
+            dto.setNombres(persona.getNombres());
+            dto.setPaterno(persona.getPaterno());
+            dto.setMaterno(persona.getMaterno());
+        }
+
+        dto.setIdAgenda(cita.getAgenda().getIdAgenda());
+        dto.setFechaHora(cita.getAgenda().getFecha());
+
         if (cita.getSolicitud() != null) {
             Solicitud solicitud = cita.getSolicitud();
             SolicitudAsociadaDto solicitudDto = new SolicitudAsociadaDto(
-                    solicitud.getIdSolicitud(),
-                    solicitud.getEstado().name(),
-                    solicitud.getFechaSolicitud());
+                solicitud.getIdSolicitud(),
+                solicitud.getEstado().name(),
+                solicitud.getFechaSolicitud()
+            );
             dto.setSolicitud(solicitudDto);
-        } else {
-            dto.setSolicitud(null);
         }
+
         if (cita.getTramite() != null) {
-            dto.setTramite(mapTramiteToDto(cita.getTramite()));
-        } else {
-            dto.setTramite(null);
+            TramiteResponse tramiteDto = new TramiteResponse();
+            tramiteDto.setIdTramite(cita.getTramite().getIdTramite());
+            tramiteDto.setNombreTramite(cita.getTramite().getNombre());
+            tramiteDto.setDescripcionTramite(cita.getTramite().getDescripcion());
+            dto.setTramite(tramiteDto);
         }
+
+        if (cita.getBloqueHorario() != null) {
+            BloqueHorarioResponse bloqueHorarioDto = new BloqueHorarioResponse(
+                cita.getBloqueHorario().getIdBloque(),
+                cita.getBloqueHorario().getHoraInicio().toString(),
+                cita.getBloqueHorario().getHoraFin().toString(),
+                cita.getBloqueHorario().getCuposDisponibles()
+            );
+            dto.setBloqueHorario(bloqueHorarioDto);
+        }
+
         return dto;
     }
 
     public List<CitaDto> toDtoList(List<Cita> citas) {
-        return citas.stream()
-                .map(this::toDto)
-                .toList();
+        return citas.stream().map(this::toDto).toList();
     }
 
-    private TramiteResponse mapTramiteToDto(Tramite tramite) {
-        TramiteResponse dto = new TramiteResponse();
-        dto.setIdTramite(tramite.getIdTramite());
-        dto.setNombreTramite(tramite.getNombre());
-        dto.setDescripcionTramite(tramite.getDescripcion());
-        dto.setPideDocumentos(tramite.isPideDocumentos());
-        dto.setRequiereSolicitud(tramite.isRequiereSolicitud());
-        // Mapear otros campos si es necesario
-        return dto;
-    }
-
-    public Cita toEntity(CitaRequest request, Agenda agenda, BloqueHorario bloqueHorario,
-            SaludFormulario saludFormulario, Solicitud solicitud) {
+    public Cita toEntity(CitaRequest citaRequest, Agenda agenda, BloqueHorario bloqueHorario, SaludFormulario saludFormulario, Solicitud solicitud) {
         Cita cita = new Cita();
-        cita.setRut(request.getRut());
+        cita.setRut(citaRequest.getRut());
         cita.setAgenda(agenda);
         cita.setBloqueHorario(bloqueHorario);
         cita.setSaludFormulario(saludFormulario);
         cita.setSolicitud(solicitud);
         return cita;
+    }
+
+    public Map<String, Object> createVariablesCorreoCita(Cita cita, String nombres) {
+        return Map.of(
+                "nombres", nombres,
+                "fecha", cita.getFechaAgenda().toString(),
+                "hora", cita.getHoraInicioBloqueHoraio().toString(),
+                "tramite", cita.nombreTramite(),
+                "urlPlataforma", appProperties.getPlataformaUrl()
+        );
     }
 }

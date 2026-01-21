@@ -3,20 +3,25 @@ package com.agendalc.agendalc.controllers;
 import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
+import com.agendalc.agendalc.dto.DocumentoDto;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.exceptions.NotFounException;
+import com.agendalc.agendalc.services.interfaces.ArchivoService;
 import com.agendalc.agendalc.services.interfaces.CitaService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.persistence.EntityNotFoundException;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/agendalc/citas")
@@ -26,33 +31,60 @@ public class CitaController {
     private static final String ERROR_KEY = "error";
 
     private final CitaService citaService;
+    private final ArchivoService archivoService;
+    private final ObjectMapper objectMapper;
 
-    public CitaController(CitaService citaService) {
+    public CitaController(CitaService citaService, ArchivoService archivoService, ObjectMapper objectMapper) {
         this.citaService = citaService;
+        this.archivoService = archivoService;
+        this.objectMapper = objectMapper;
     }
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Object> createCita(@RequestBody CitaRequest citaRequest) {
-        try {
-            CitaDto nuevaCita = citaService.createCita(citaRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
+    public ResponseEntity<CitaDto> crearCita(@RequestBody CitaRequest citaRequest) {
+        CitaDto nuevaCita = citaService.createCita(citaRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
+    }
 
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of(ERROR_KEY, "No se encontró la agenda o bloque horario" + e.getMessage()));
+    @PostMapping("/{id}/documentos")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> adjuntarDocumentos(
+            @PathVariable Long id,
+            @RequestParam("metadata") String metadataStr,
+            @RequestParam(name = "documentos", required = false) List<MultipartFile> documentos)
 
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of(ERROR_KEY, "Datos inválidos en la solicitud"));
+            throws IOException {
 
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of(ERROR_KEY, "No hay cupos disponibles en este bloque horario"));
+        List<DocumentoDto> documentoDtos = objectMapper.readValue(metadataStr, new TypeReference<List<DocumentoDto>>() {
+        });
 
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of(ERROR_KEY, e.getMessage()));
+        if (documentos != null && !documentos.isEmpty()) {
+            Cita cita = citaService.findById(id);
+            procesarYGuardarArchivos(documentoDtos, documentos, cita.getRut());
+        }
+
+        citaService.adjuntarDocumentos(id, documentoDtos);
+        return ResponseEntity.ok().build();
+    }
+
+    private void procesarYGuardarArchivos(List<DocumentoDto> documentoDtos, List<MultipartFile> documentos, Integer rut)
+            throws IOException {
+        if (documentoDtos == null || documentoDtos.isEmpty()) {
+            return;
+        }
+
+        Map<String, MultipartFile> fileMap = documentos.stream()
+                .collect(Collectors.toMap(MultipartFile::getOriginalFilename, file -> file, (a, b) -> a));
+
+        for (DocumentoDto docDto : documentoDtos) {
+            MultipartFile file = fileMap.get(docDto.getNombreArchivo());
+            if (file != null) {
+                String nombreArchivoGuardado = archivoService.guardarArchivo(file);
+                docDto.setPathStorage(nombreArchivoGuardado);
+                docDto.setTipoMime(file.getContentType());
+                docDto.setRutPersona(rut.toString());
+            }
         }
     }
 

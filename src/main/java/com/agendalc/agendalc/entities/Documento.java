@@ -3,6 +3,7 @@ package com.agendalc.agendalc.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +31,10 @@ public class Documento {
     @ManyToOne
     @JoinColumn(name = "documentos_tramite_id")
     private DocumentosTramite documentosTramite;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cita_id")
+    private Cita cita;
 
     @Column(name = "nombre_archivo", nullable = false)
     private String nombreArchivo;
@@ -143,5 +148,13 @@ public class Documento {
 
     public void setAprobado(boolean aprobado) {
         this.aprobado = aprobado;
+    }
+
+    public Cita getCita() {
+        return cita;
+    }
+
+    public void setCita(Cita cita) {
+        this.cita = cita;
     }
 }

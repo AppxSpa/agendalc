@@ -3,6 +3,8 @@ package com.agendalc.agendalc.entities;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -15,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
 @Entity
@@ -46,6 +49,9 @@ public class Cita {
     @OneToOne(mappedBy = "cita", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private AsistenciaCita asistencia;
 
+    @OneToMany(mappedBy = "cita", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Documento> documentos = new ArrayList<>();
+
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime fechaHora;
@@ -53,6 +59,7 @@ public class Cita {
     public Long getIdCita() {
         return idCita;
     }
+
 
     public void setIdCita(Long idCita) {
         this.idCita = idCita;

@@ -12,6 +12,8 @@ public interface AsistenciaCitaRepository extends JpaRepository<AsistenciaCita, 
 
     boolean existsByCitaIdCita(Long citaId);
 
-    long countByCitaFechaCitaBetween(LocalDate fechaInicio, LocalDate fechaFin);
+    long countByCitaAgendaFechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
+
+    int countByCitaAgendaFecha(LocalDate fecha);
 
 }

@@ -12,14 +12,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
+import com.agendalc.agendalc.dto.DocumentoDto;
 import com.agendalc.agendalc.dto.PersonaResponse;
 import com.agendalc.agendalc.entities.Agenda;
 import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
+import com.agendalc.agendalc.entities.Documento;
+import com.agendalc.agendalc.entities.DocumentosTramite;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
 import com.agendalc.agendalc.exceptions.NotFounException;
 import com.agendalc.agendalc.repositories.CitaRepository;
+import com.agendalc.agendalc.repositories.DocumentoRepository;
+import com.agendalc.agendalc.repositories.DocumentosTramiteRepository;
 import com.agendalc.agendalc.repositories.SaludFormularioRepository;
 import com.agendalc.agendalc.repositories.SolicitudRepository;
 import com.agendalc.agendalc.services.interfaces.AgendaService;
@@ -28,6 +33,7 @@ import com.agendalc.agendalc.services.interfaces.BloqueHorarioService;
 import com.agendalc.agendalc.services.interfaces.CitaService;
 import com.agendalc.agendalc.services.interfaces.NotificacionService;
 import com.agendalc.agendalc.services.mappers.CitaMapper;
+import com.agendalc.agendalc.services.mappers.DocumentoMapper;
 import com.agendalc.agendalc.utils.RepositoryUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -51,13 +57,22 @@ public class CitaServiceImpl implements CitaService {
 
     private final SolicitudRepository solicitudRepository;
 
+    private final DocumentoRepository documentoRepository;
+
+    private final DocumentoMapper documentoMapper;
+
+    private final DocumentosTramiteRepository documentosTramiteRepository;
+
     public CitaServiceImpl(CitaRepository citaRepository, AgendaService agendaService,
             BloqueHorarioService bloqueHorarioService,
             ApiPersonaService apiPersonaService,
             NotificacionService notificacionService,
             SaludFormularioRepository saludFormularioRepository,
             CitaMapper citaMapper,
-            SolicitudRepository solicitudRepository) {
+            SolicitudRepository solicitudRepository,
+            DocumentoRepository documentoRepository,
+            DocumentoMapper documentoMapper,
+            DocumentosTramiteRepository documentosTramiteRepository) {
         this.citaRepository = citaRepository;
         this.agendaService = agendaService;
         this.bloqueHorarioService = bloqueHorarioService;
@@ -66,6 +81,9 @@ public class CitaServiceImpl implements CitaService {
         this.saludFormularioRepository = saludFormularioRepository;
         this.citaMapper = citaMapper;
         this.solicitudRepository = solicitudRepository;
+        this.documentoRepository = documentoRepository;
+        this.documentoMapper = documentoMapper;
+        this.documentosTramiteRepository = documentosTramiteRepository;
     }
 
     @Transactional
@@ -94,13 +112,40 @@ public class CitaServiceImpl implements CitaService {
         // Usar el mapper para construir la entidad
         Cita cita = citaMapper.toEntity(citaRequest, agenda, bloqueHorario, saludFormulario, solicitud);
 
-        cita = citaRepository.save(cita);
+        Cita citaGuardada = citaRepository.save(cita);
 
         decrementarYGuardarCupos(bloqueHorario);
 
         notificacionService.enviarNotificacionCitaAgendada(cita);
 
-        return new CitaDto(cita);
+        return citaMapper.toDto(citaGuardada);
+    }
+
+    @Override
+    @Transactional
+    public void adjuntarDocumentos(Long citaId, List<DocumentoDto> documentos) {
+        Cita cita = findById(citaId);
+
+        if (documentos != null && !documentos.isEmpty()) {
+            for (DocumentoDto docDto : documentos) {
+                Documento documento = documentoMapper.toEntity(docDto);
+                documento.setCita(cita);
+                documento.setOrigenId(cita.getIdCita());
+                documento.setOrigenTipo("CITA");
+
+                if (docDto.getDocumentosTramiteId() != null) {
+                    DocumentosTramite documentosTramite = documentosTramiteRepository
+                            .findById(docDto.getDocumentosTramiteId())
+                            .orElse(null);
+                    if (documentosTramite != null) {
+                        documento.setDocumentosTramite(documentosTramite);
+                        documento.setTramite(documentosTramite.getTramite());
+                    }
+                }
+
+                documentoRepository.save(documento);
+            }
+        }
     }
 
     private void validarCreacionCita(CitaRequest citaRequest, Agenda agenda, BloqueHorario bloqueHorario) {

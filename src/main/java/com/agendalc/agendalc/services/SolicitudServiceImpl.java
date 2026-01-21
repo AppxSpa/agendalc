@@ -3,6 +3,7 @@ package com.agendalc.agendalc.services;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.EnumSet;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +19,10 @@ import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.SolcitudRechazo;
 import com.agendalc.agendalc.entities.Solicitud;
 import com.agendalc.agendalc.entities.Tramite;
+import com.agendalc.agendalc.entities.TramiteLicencia;
 import com.agendalc.agendalc.entities.MovimientoSolicitud.TipoMovimiento;
 import com.agendalc.agendalc.entities.Solicitud.EstadoSolicitud;
+import com.agendalc.agendalc.entities.enums.ClaseLicencia;
 import com.agendalc.agendalc.repositories.CitaRepository;
 import com.agendalc.agendalc.repositories.SaludFormularioRepository;
 import com.agendalc.agendalc.repositories.SolicitudRechazoRepository;
@@ -113,7 +116,7 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     @Transactional
-    public SolicitudResponse createSolicitud(SolicitudRequest request) throws IOException {
+    public SolicitudResponse createSolicitud(SolicitudRequest request, MultipartFile[] files) throws IOException {
         Tramite tramite = getTramiteById(request.getIdTramite());
         Solicitud solicitud = solicitudMapper.toEntity(request, tramite);
 
@@ -122,10 +125,36 @@ public class SolicitudServiceImpl implements SolicitudService {
         MovimientoSolicitud primerMovimiento = firstMovement(solicitud, TipoMovimiento.CREACION);
         solicitud.addMovimiento(primerMovimiento);
 
+        // Guardar la solicitud para obtener un ID antes de asociar documentos
         Solicitud savedSolicitud = solicitudRepository.save(solicitud);
 
-        if (request.getDocumentos() != null && !request.getDocumentos().isEmpty()) {
+        // Procesar y guardar documentos si existen
+        if (files != null && files.length > 0) {
+            if (request.getDocumentos() == null || request.getDocumentos().size() != files.length) {
+                throw new IllegalArgumentException("La cantidad de archivos no coincide con la cantidad de tipos de documento especificados.");
+            }
+            // Asignar los archivos a los documentos subidos
+            for (int i = 0; i < files.length; i++) {
+                request.getDocumentos().get(i).setFile(files[i]);
+            }
             solicitudDocumentoService.guardarDocumentosNuevos(savedSolicitud, tramite, request.getDocumentos());
+        }
+
+        // Procesar y guardar clases de licencia si existen
+        if (request.getClases() != null && !request.getClases().isEmpty()) {
+            for (String claseStr : request.getClases()) {
+                try {
+                    ClaseLicencia claseLicencia = ClaseLicencia.valueOf(claseStr.trim().toUpperCase());
+                    TramiteLicencia tramiteLicencia = new TramiteLicencia();
+                    tramiteLicencia.setClaseLicencia(claseLicencia);
+                    tramiteLicencia.setTramite(tramite);
+                    tramite.getClasesLicencia().add(tramiteLicencia);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Clase de licencia inválida: " + claseStr);
+                }
+            }
+            // La cascada (CascadeType.ALL) en la entidad Tramite se encargará de persistir los TramiteLicencia
+            tramiteRepository.save(tramite);
         }
 
         asociarCita(savedSolicitud, request.getIdCita());
@@ -259,17 +288,19 @@ public class SolicitudServiceImpl implements SolicitudService {
 
         String strEstado = estadoSolicitud != null ? estadoSolicitud.toString() : null;
 
+        // Conjunto de estados que consideramos como finalizados
+        EnumSet<EstadoSolicitud> finalizados = EnumSet.of(EstadoSolicitud.APROBADA,
+                EstadoSolicitud.RECHAZADA,
+                EstadoSolicitud.FINALIZADA);
+
         return switch (strEstado) {
             case "FINALIZADA" -> solicitudes.stream()
-                    .filter(sol -> sol.getEstado().equals(EstadoSolicitud.APROBADA)
-                            || sol.getEstado().equals(EstadoSolicitud.RECHAZADA)
-                            || sol.getEstado().equals(EstadoSolicitud.FINALIZADA))
+                    .filter(sol -> finalizados.contains(sol.getEstado()))
                     .toList();
 
             default -> solicitudes.stream()
-                    .filter(sol -> !sol.getEstado().equals(EstadoSolicitud.APROBADA)
-                            || !sol.getEstado().equals(EstadoSolicitud.RECHAZADA)
-                            || !sol.getEstado().equals(EstadoSolicitud.FINALIZADA))
+                    // Traer el resto: todos los que NO están en el conjunto de finalizados
+                    .filter(sol -> !finalizados.contains(sol.getEstado()))
                     .toList();
         };
 

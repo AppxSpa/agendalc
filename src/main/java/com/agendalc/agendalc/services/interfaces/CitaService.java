@@ -6,11 +6,14 @@ import java.util.List;
 import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
+import com.agendalc.agendalc.dto.DocumentoDto;
 import com.agendalc.agendalc.entities.Cita;
 
 public interface CitaService {
 
     CitaDto createCita(CitaRequest citaRequest);
+
+    void adjuntarDocumentos(Long citaId, List<DocumentoDto> documentos);
 
     Cita findById(Long id);
 

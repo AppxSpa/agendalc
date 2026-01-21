@@ -1,5 +1,7 @@
 package com.agendalc.agendalc.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -17,6 +19,7 @@ public class TramiteEtapa {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("tramiteId")
+    @JsonIgnore
     private Tramite tramite;
 
     @ManyToOne(fetch = FetchType.LAZY)

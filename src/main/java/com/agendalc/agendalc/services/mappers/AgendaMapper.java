@@ -41,6 +41,7 @@ public class AgendaMapper {
                 dto.setHoraFin(bloque.getHoraFin().toString());
                 dto.setHoraInicio(bloque.getHoraInicio().toString());
                 dto.setCuposDisponibles(bloque.getCuposDisponibles());
+                dto.setCuposTotales(bloque.getCuposTotales());
                 return dto;
             }).toList();
 

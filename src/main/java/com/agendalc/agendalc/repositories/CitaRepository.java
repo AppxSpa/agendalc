@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
+import com.agendalc.agendalc.entities.Tramite;
 
 public interface CitaRepository extends JpaRepository<Cita, Long> {
 
@@ -25,11 +26,8 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     @Query("SELECT t.nombre FROM Cita c JOIN c.agenda.tramite t WHERE c.agenda.fecha BETWEEN :fechaInicio AND :fechaFin GROUP BY t.nombre ORDER BY COUNT(t.nombre) DESC")
     String findTramiteMasSolicitado(@Param("fechaInicio") LocalDate fechaInicio, @Param("fechaFin") LocalDate fechaFin);
 
-    @Query("SELECT s.claseLicencia FROM Solicitud s JOIN s.cita c WHERE c.agenda.fecha BETWEEN :fechaInicio AND :fechaFin GROUP BY s.claseLicencia ORDER BY COUNT(s.claseLicencia) DESC")
+    @Query("SELECT slo.tiposLicencias FROM Cita c JOIN c.solicitud s JOIN s.saludFormulario sf JOIN sf.licenciasOtorgadas slo WHERE c.agenda.fecha BETWEEN :fechaInicio AND :fechaFin GROUP BY slo.tiposLicencias ORDER BY COUNT(slo.tiposLicencias) DESC")
     String findClaseMasSolicitada(@Param("fechaInicio") LocalDate fechaInicio, @Param("fechaFin") LocalDate fechaFin);
-    
-    @Query("SELECT COUNT(c) FROM Cita c WHERE c.agenda.fecha BETWEEN :fechaInicio AND :fechaFin")
-    long countByFechaCitaBetween(@Param("fechaInicio") LocalDate fechaInicio, @Param("fechaFin") LocalDate fechaFin);
 
     // Métodos para CitaServiceImpl
     List<Cita> findByRut(Integer rut);
@@ -40,6 +38,12 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     // Métodos descubiertos por el compilador de Maven
     Optional<Cita> findBySolicitud(Solicitud solicitud);
-    
+
     Optional<Cita> findBySaludFormulario(SaludFormulario saludFormulario);
+
+    int countByFechaHoraBetween(
+            LocalDateTime inicio,
+            LocalDateTime fin);
+
+    List<Cita> findByFechaHoraBetweenAndAgendaTramite(LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, Tramite tramite);
 }

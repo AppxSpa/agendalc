@@ -1,5 +1,7 @@
 package com.agendalc.agendalc.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +20,7 @@ public class DocumentosTramite {
 
     @ManyToOne
     @JoinColumn(name = "tramite_id")
+    @JsonIgnore
     private Tramite tramite;
 
     private String nombreDocumento;

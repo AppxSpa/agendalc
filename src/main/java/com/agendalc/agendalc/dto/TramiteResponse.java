@@ -1,6 +1,8 @@
 package com.agendalc.agendalc.dto;
 
 import java.util.List;
+import java.util.Set;
+import com.agendalc.agendalc.entities.enums.ClaseLicencia;
 
 public class TramiteResponse {
 
@@ -10,6 +12,33 @@ public class TramiteResponse {
     private boolean pideDocumentos;
     private boolean requiereSolicitud;
     private List<DocumentosTramiteResponse> documentosRequeridos;
+    private Set<ClaseLicencia> clasesLicencia;
+    private boolean requiereAgenda;
+    private boolean activo;
+
+    public boolean isRequiereAgenda() {
+        return requiereAgenda;
+    }
+
+    public void setRequiereAgenda(boolean requiereAgenda) {
+        this.requiereAgenda = requiereAgenda;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public Set<ClaseLicencia> getClasesLicencia() {
+        return clasesLicencia;
+    }
+
+    public void setClasesLicencia(Set<ClaseLicencia> clasesLicencia) {
+        this.clasesLicencia = clasesLicencia;
+    }
 
     public boolean isPideDocumentos() {
         return pideDocumentos;

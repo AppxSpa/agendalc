@@ -39,6 +39,28 @@ public class DocumentoMapper {
         return builder.build();
     }
 
+    public Documento toEntity(DocumentoDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Documento documento = new Documento();
+        documento.setId(dto.getId());
+        documento.setRutPersona(dto.getRutPersona());
+        documento.setNombreArchivo(dto.getNombreArchivo());
+        documento.setPathStorage(dto.getPathStorage());
+        documento.setTipoMime(dto.getTipoMime());
+        documento.setFechaCarga(dto.getFechaCarga());
+        documento.setOrigenId(dto.getOrigenId());
+        documento.setOrigenTipo(dto.getOrigenTipo());
+
+        // Tramite and DocumentosTramite would need to be set from repositories
+        // based on their IDs (dto.getTramiteId(), dto.getDocumentosTramiteId())
+        // This mapping is simplified and might need adjustment in the service layer.
+
+        return documento;
+    }
+
     public List<DocumentoDto> toDtoList(List<Documento> documentos) {
         if (documentos == null) {
             return Collections.emptyList();

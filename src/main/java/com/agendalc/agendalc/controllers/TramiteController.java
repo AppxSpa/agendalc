@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.agendalc.agendalc.dto.DeleteDocumentsRequest;
 import com.agendalc.agendalc.dto.TramiteRequest;
 import com.agendalc.agendalc.dto.TramiteResponse;
 import com.agendalc.agendalc.entities.Tramite;
@@ -72,10 +73,10 @@ public class TramiteController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('FUNC')")
-    public ResponseEntity<Object> updateTramite(@PathVariable Long id, @RequestBody Tramite tramite) {
+    public ResponseEntity<Object> updateTramite(@PathVariable Long id, @RequestBody TramiteRequest request) {
 
         try {
-            Tramite tramiteActualizado = tramiteService.updateTramite(id, tramite);
+            Tramite tramiteActualizado = tramiteService.updateTramite(id, request);
             return new ResponseEntity<>(tramiteActualizado, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -91,4 +92,15 @@ public class TramiteController {
         return eliminado ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    @PostMapping("/{tramiteId}/documentos/delete-batch")
+    @PreAuthorize("hasRole('FUNC')")
+    public ResponseEntity<Void> deleteDocumentosTramite(@PathVariable Long tramiteId, @RequestBody DeleteDocumentsRequest request) {
+        try {
+            tramiteService.deleteDocumentosRequeridos(tramiteId, request.getDocumentoIds());
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            // In a real app, you might want more specific error handling
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

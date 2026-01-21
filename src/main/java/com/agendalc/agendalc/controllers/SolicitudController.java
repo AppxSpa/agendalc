@@ -2,7 +2,6 @@ package com.agendalc.agendalc.controllers;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,12 +16,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.agendalc.agendalc.dto.AprobeRejectRequest;
-import com.agendalc.agendalc.dto.DocumentosSubidosRequest;
 import com.agendalc.agendalc.dto.SolicitudRequest;
 import com.agendalc.agendalc.dto.SolicitudResponse;
 import com.agendalc.agendalc.dto.SolicitudResponseList;
@@ -48,21 +47,15 @@ public class SolicitudController {
     @PreAuthorize("hasRole('FUNC')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SolicitudResponse> crearSolicitudConDocumentos(
-            @RequestParam("idTramite") Long idTramite,
-            @RequestParam("rut") Integer rut,
-            @RequestParam(value = "files", required = false) List<MultipartFile> files,
-            @RequestParam(value = "idTipoDocumentos", required = false) List<Long> idTipoDocumentos) {
+            @RequestPart("solicitud") SolicitudRequest solicitudRequest,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
 
-        // Validar y construir la lista de documentos para el servicio
-        List<DocumentosSubidosRequest> documentosSubidosParaServicio = validateAndBuildDocumentRequests(files,
-                idTipoDocumentos);
-
-        // Construir el objeto SolicitudRequest
-        SolicitudRequest request = new SolicitudRequest(idTramite, rut, documentosSubidosParaServicio);
-
-        // Llamar al servicio y manejar excepciones
         try {
-            SolicitudResponse response = solicitudService.createSolicitud(request);
+            // La validación y construcción de la lista de documentos ahora se puede
+            // manejar dentro del servicio
+            // o mantenerse aquí si se prefiere una validación temprana.
+            // Por simplicidad, pasamos los archivos directamente al servicio.
+            SolicitudResponse response = solicitudService.createSolicitud(solicitudRequest, files);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -221,44 +214,6 @@ public class SolicitudController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
-    }
-
-    private List<DocumentosSubidosRequest> validateAndBuildDocumentRequests(
-            List<MultipartFile> files, List<Long> idTipoDocumentos) {
-
-        final boolean hasFiles = files != null && !files.isEmpty();
-        final boolean hasIdTipoDocumentos = idTipoDocumentos != null && !idTipoDocumentos.isEmpty();
-
-        // Validación 1: Ambos deben existir o ninguno
-        if (hasFiles != hasIdTipoDocumentos) {
-            if (hasFiles) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Se adjuntaron archivos pero no se especificaron los tipos de documentos asociados. Asegúrate de enviar 'idTipoDocumentos'.");
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Se especificaron tipos de documentos pero no se adjuntaron archivos. Asegúrate de enviar 'files'.");
-            }
-        }
-
-        // Validación 2: Cantidad de archivos e IDs debe coincidir
-        if (hasFiles && files.size() != idTipoDocumentos.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "La cantidad de archivos adjuntos (" + files.size()
-                            + ") no coincide con la cantidad de IDs de tipos de documentos proporcionados ("
-                            + idTipoDocumentos.size() + ").");
-        }
-
-        List<DocumentosSubidosRequest> documentosSubidosParaServicio = new ArrayList<>();
-        if (hasFiles) {
-            for (int i = 0; i < files.size(); i++) {
-                if (files.get(i) == null || idTipoDocumentos.get(i) == null) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Un archivo o su ID de tipo de documento asociado es nulo en la lista de entrada.");
-                }
-                documentosSubidosParaServicio.add(new DocumentosSubidosRequest(idTipoDocumentos.get(i), files.get(i)));
-            }
-        }
-        return documentosSubidosParaServicio;
     }
 
 }

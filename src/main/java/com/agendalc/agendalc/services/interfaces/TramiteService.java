@@ -14,8 +14,10 @@ public interface TramiteService {
 
     Tramite getTramiteById(Long id);
 
-    Tramite updateTramite(Long id, Tramite tramite);
+    Tramite updateTramite(Long id, TramiteRequest request);
 
     boolean deleteTramiteById(Long id);
+
+    void deleteDocumentosRequeridos(Long tramiteId, List<Long> documentoIds);
 
 }

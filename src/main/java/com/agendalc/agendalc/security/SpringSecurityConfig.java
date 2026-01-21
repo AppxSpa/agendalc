@@ -54,7 +54,8 @@ public class SpringSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Usa el bean de CORS
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                         .requestMatchers(HttpMethod.GET,"/api/agendalc/documents/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/agendalc/documents/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/agendalc/dashboard/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtValidationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class);

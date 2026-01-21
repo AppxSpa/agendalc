@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.agendalc.agendalc.dto.TramiteRequest;
 import com.agendalc.agendalc.dto.TramiteResponse;
 import com.agendalc.agendalc.entities.Tramite;
+import com.agendalc.agendalc.entities.TramiteLicencia;
 import com.agendalc.agendalc.repositories.TramiteRepository;
 import com.agendalc.agendalc.services.interfaces.TramiteService;
 import com.agendalc.agendalc.services.mappers.TramiteMapper;
@@ -46,12 +47,30 @@ public class TramiteServiceImpl implements TramiteService {
 
     @Transactional
     @Override
-    public Tramite updateTramite(Long id, Tramite tramite) {
-        if (tramiteRepository.existsById(id)) {
-            tramite.setIdTramite(id);
-            return tramiteRepository.save(tramite);
+    public Tramite updateTramite(Long id, TramiteRequest request) {
+        Tramite tramiteExistente = tramiteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No existe el trámite con id: " + id));
+
+        // Update simple fields
+        tramiteExistente.setNombre(request.getNombre().toUpperCase());
+        tramiteExistente.setDescripcion(request.getDescripcion());
+        tramiteExistente.setPideDocumentos(request.isPideDocumentos());
+        tramiteExistente.setRequiereSolicitud(request.isRequiereSolicitud());
+        tramiteExistente.setRequiereAgenda(request.isRequiereAgenda());
+        tramiteExistente.setActivo(request.isActivo());
+
+        // Update the collection
+        tramiteExistente.getClasesLicencia().clear(); // Clear the old collection
+        if (request.getClasesLicencia() != null) {
+            request.getClasesLicencia().forEach(claseEnum -> {
+                TramiteLicencia tl = new TramiteLicencia();
+                tl.setClaseLicencia(claseEnum);
+                tl.setTramite(tramiteExistente);
+                tramiteExistente.getClasesLicencia().add(tl); // Add the new ones
+            });
         }
-        return null;
+
+        return tramiteRepository.save(tramiteExistente);
     }
 
     @Override
@@ -61,6 +80,18 @@ public class TramiteServiceImpl implements TramiteService {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    @Override
+    public void deleteDocumentosRequeridos(Long tramiteId, List<Long> documentoIds) {
+        Tramite tramite = tramiteRepository.findById(tramiteId)
+                .orElseThrow(() -> new IllegalArgumentException("No existe el trámite con id: " + tramiteId));
+
+        tramite.getDocumentosRequeridos()
+                .removeIf(documento -> documentoIds.contains(documento.getIdDocumento()));
+
+        tramiteRepository.save(tramite);
     }
 
 }

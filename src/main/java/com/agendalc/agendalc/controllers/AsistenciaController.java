@@ -13,7 +13,7 @@ import com.agendalc.agendalc.entities.AsistenciaCita;
 import com.agendalc.agendalc.services.interfaces.AsistenciaCitaService;
 
 @RestController
-@RequestMapping("/api/agendalc/agendas")
+@RequestMapping("/api/agendalc/asistencia")
 @CrossOrigin(origins = "https://dev.appx.cl/")
 public class AsistenciaController {
 

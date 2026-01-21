@@ -36,9 +36,40 @@ public class Tramite {
     @jakarta.persistence.OrderBy("orden ASC")
     private List<TramiteEtapa> tramiteEtapas;
 
+    @OneToMany(mappedBy = "tramite", cascade = CascadeType.ALL, orphanRemoval = true, fetch = jakarta.persistence.FetchType.LAZY)
+    private Set<TramiteLicencia> clasesLicencia = new java.util.HashSet<>();
+
     private boolean pideDocumentos;
 
     private boolean requiereSolicitud;
+
+    private boolean requiereAgenda;
+
+    private boolean activo = true;
+
+    public boolean isRequiereAgenda() {
+        return requiereAgenda;
+    }
+
+    public void setRequiereAgenda(boolean requiereAgenda) {
+        this.requiereAgenda = requiereAgenda;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public Set<TramiteLicencia> getClasesLicencia() {
+        return clasesLicencia;
+    }
+
+    public void setClasesLicencia(Set<TramiteLicencia> clasesLicencia) {
+        this.clasesLicencia = clasesLicencia;
+    }
 
     public List<TramiteEtapa> getTramiteEtapas() {
         return tramiteEtapas;

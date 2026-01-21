@@ -2,28 +2,51 @@ package com.agendalc.agendalc.dto;
 
 import java.time.LocalDate;
 
-import com.agendalc.agendalc.entities.Cita;
-
 public class CitaDto {
     private Long idCita;
     private Integer rut;
+    private String dv;
+    private String nombres;
+    private String paterno;
+    private String materno;
+
+    public String getDv() {
+        return dv;
+    }
+
+    public void setDv(String dv) {
+        this.dv = dv;
+    }
+
+    public String getNombres() {
+        return nombres;
+    }
+
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public String getPaterno() {
+        return paterno;
+    }
+
+    public void setPaterno(String paterno) {
+        this.paterno = paterno;
+    }
+
+    public String getMaterno() {
+        return materno;
+    }
+
+    public void setMaterno(String materno) {
+        this.materno = materno;
+    }
+
     private Long idAgenda;
     private LocalDate fechaHora;
     private SolicitudAsociadaDto solicitud;
     private TramiteResponse tramite;
     private BloqueHorarioResponse bloqueHorario;
-
-    public CitaDto(Cita cita) {
-        this.idCita = cita.getIdCita();
-        this.rut = cita.getRut();
-        this.idAgenda = cita.getAgenda().getIdAgenda();
-        this.fechaHora = cita.getAgenda().getFecha();
-        this.bloqueHorario = new BloqueHorarioResponse(
-                cita.getBloqueHorario().getIdBloque(),
-                cita.getBloqueHorario().getHoraInicio().toString(),
-                cita.getBloqueHorario().getHoraFin().toString(),
-                cita.getBloqueHorario().getCuposDisponibles());
-    }
 
     public Long getIdCita() {
         return idCita;

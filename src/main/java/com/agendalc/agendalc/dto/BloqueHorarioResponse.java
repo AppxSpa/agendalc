@@ -6,6 +6,7 @@ public class BloqueHorarioResponse {
     private String horaInicio;
     private String horaFin;
     private Integer cuposDisponibles;
+    private Integer cuposTotales;
 
     public BloqueHorarioResponse() {
     }
@@ -15,6 +16,14 @@ public class BloqueHorarioResponse {
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
         this.cuposDisponibles = cuposDisponibles;
+    }
+
+    public Integer getCuposTotales() {
+        return cuposTotales;
+    }
+
+    public void setCuposTotales(Integer cuposTotales) {
+        this.cuposTotales = cuposTotales;
     }
 
     public Long getId() {

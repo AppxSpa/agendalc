@@ -18,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/agendalc/documents")
@@ -26,6 +28,7 @@ public class DocumentController {
 
     private final AppProperties appProperties;
     private final DocumentoService documentoService;
+    Logger logger = Logger.getLogger(DocumentController.class.getName());
 
     public DocumentController(AppProperties appProperties, DocumentoService documentoService) {
         this.appProperties = appProperties;
@@ -46,6 +49,7 @@ public class DocumentController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getFile(@PathVariable String filename) throws MalformedURLException {
         Path filePath = Paths.get(appProperties.getUploadDir()).resolve(filename);
+        logger.log(Level.INFO,"Attempting to serve file: {0}", filePath);
         Resource resource = new UrlResource(filePath.toUri());
 
         if (!resource.exists() || !resource.isReadable()) {

@@ -74,4 +74,8 @@ public class PersonaResponse {
         return nombres + " " + paterno + " " + materno;
     }
 
+    public String getRutCompleto() {
+        return rut.toString() + "-" + vrut;
+    }
+
 }
