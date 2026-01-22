@@ -1,8 +1,8 @@
-name: Docker Build and Push
+name: Docker CI Agendalc
 
 on:
   push:
-    branches: [ "main" ] # Se ejecuta cada vez que subes algo a la rama main
+    branches: [ "main" ] # Se activa cuando haces push a la rama main
 
 jobs:
   build:
@@ -22,4 +22,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: tu-usuario-docker/agendalc:latest
+          # Usamos tu usuario confirmado de las capturas
+          tags: mirkogutierrezappx/agendalc:latest
