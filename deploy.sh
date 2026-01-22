@@ -13,5 +13,5 @@ sudo docker run \
     --env-file .env \
     --network appx \
     --add-host=host.docker.internal:host-gateway \
-    --name agendalc-container \
+    --name agendalc-container agendalc \
     mirkogutierrezappx/agendalc:latest
