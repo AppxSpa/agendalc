@@ -1,17 +1,42 @@
 #!/bin/bash
-# 1. Bajar la imagen fresca de la nube
-sudo docker pull mirkogutierrezappx/agendalc:latest
 
-# 2. Limpiar el contenedor anterior
-sudo docker stop agendalc-container 2>/dev/null
-sudo docker rm agendalc-container 2>/dev/null
+# =========================================================
+# CONFIGURACIÓN DEL MICROSERVICIO
+# =========================================================
+NOMBRE_APP="agendalc"                 # Nombre del contenedor
+PUERTO="8081"                       # Puerto que usa la App
+IMAGEN_HUB="mirkogutierrezappx/agendalc" # Repositorio en Docker Hub
+# =========================================================
 
-# 3. Correr la nueva versión
-sudo docker run \
-    --restart always \
-    -d -p 8081:8081 \
-    --env-file .env \
-    --network appx \
-    --add-host=host.docker.internal:host-gateway \
-    --name agendalc-container agendalc \
-    mirkogutierrezappx/agendalc:latest
+OPCION=${1:-"dev"}
+
+case $OPCION in
+    "prod")
+        echo "--- MODO PRODUCCIÓN: Bajando imagen de la nube ($IMAGEN_HUB) ---"
+        docker pull $IMAGEN_HUB:latest
+        TARGET_IMAGE="$IMAGEN_HUB:latest"
+        ;;
+    *)
+        echo "--- MODO DESARROLLO: Compilando localmente ($NOMBRE_APP) ---"
+        ./mvnw clean package -DskipTests
+        docker build -t $NOMBRE_APP:local .
+        TARGET_IMAGE="$NOMBRE_APP:local"
+        ;;
+esac
+
+echo "--- Limpiando contenedor anterior ---"
+docker stop ${NOMBRE_APP}-container 2>/dev/null
+docker rm ${NOMBRE_APP}-container 2>/dev/null
+
+echo "--- Iniciando contenedor en puerto $PUERTO ---"
+docker run \
+           --restart always \
+           -d -p ${PUERTO}:${PUERTO} \
+           --env-file .env \
+           --network appx \
+           --add-host=host.docker.internal:host-gateway \
+           --name ${NOMBRE_APP}-container \
+           $TARGET_IMAGE
+
+docker image prune -f
+echo "--- Proceso Terminado ($OPCION) ---"
