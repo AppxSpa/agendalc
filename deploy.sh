@@ -1,23 +1,26 @@
 #!/bin/bash
 
 # =========================================================
-# CONFIGURACIÓN DEL MICROSERVICIO
+# CONFIGURACIÓN DEL MICROSERVICIO (Actualizado a GHCR)
 # =========================================================
-NOMBRE_APP="agendalc"                 # Nombre del contenedor
-PUERTO="8081"                       # Puerto que usa la App
-IMAGEN_HUB="mirkogutierrezappx/agendalc" # Repositorio en Docker Hub
+NOMBRE_APP="agendalc"
+PUERTO="8081"
+
+# CORRECCIÓN: Usar la organización AppxSpa en minúsculas
+IMAGEN_HUB="ghcr.io/appxspa/agendalc" 
 # =========================================================
 
 OPCION=${1:-"dev"}
 
 case $OPCION in
     "prod")
-        echo "--- MODO PRODUCCIÓN: Bajando imagen de la nube ($IMAGEN_HUB) ---"
+        echo "--- MODO PRODUCCIÓN: Bajando de GHCR ($IMAGEN_HUB) ---"
         docker pull $IMAGEN_HUB:latest
         TARGET_IMAGE="$IMAGEN_HUB:latest"
         ;;
     *)
         echo "--- MODO DESARROLLO: Compilando localmente ($NOMBRE_APP) ---"
+        # Asegúrate de tener permisos en mvnw
         ./mvnw clean package -DskipTests
         docker build -t $NOMBRE_APP:local .
         TARGET_IMAGE="$NOMBRE_APP:local"
@@ -29,9 +32,11 @@ docker stop ${NOMBRE_APP}-container 2>/dev/null
 docker rm ${NOMBRE_APP}-container 2>/dev/null
 
 echo "--- Iniciando contenedor en puerto $PUERTO ---"
+# OJO: Verifica si la red es 'laflorida' o 'appx'
 docker run \
            --restart always \
-           -d -p ${PUERTO}:${PUERTO} \
+           -d \
+           -p ${PUERTO}:${PUERTO} \
            --env-file .env \
            --network appx \
            --add-host=host.docker.internal:host-gateway \
