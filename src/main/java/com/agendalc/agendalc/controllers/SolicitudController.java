@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,17 +44,10 @@ public class SolicitudController {
     }
 
     @PreAuthorize("hasRole('FUNC')")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SolicitudResponse> crearSolicitudConDocumentos(
-            @RequestPart("solicitud") SolicitudRequest solicitudRequest,
-            @RequestPart(value = "files", required = false) MultipartFile[] files) {
-
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SolicitudResponse> crearSolicitud(@RequestBody SolicitudRequest solicitudRequest) {
         try {
-            // La validación y construcción de la lista de documentos ahora se puede
-            // manejar dentro del servicio
-            // o mantenerse aquí si se prefiere una validación temprana.
-            // Por simplicidad, pasamos los archivos directamente al servicio.
-            SolicitudResponse response = solicitudService.createSolicitud(solicitudRequest, files);
+            SolicitudResponse response = solicitudService.createSolicitud(solicitudRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -63,7 +55,7 @@ public class SolicitudController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al procesar y guardar los documentos adjuntos: " + e.getMessage(), e);
+                    "Error al procesar la solicitud: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Ha ocurrido un error inesperado al crear la solicitud: " + e.getMessage(), e);

@@ -2,28 +2,28 @@ package com.agendalc.agendalc.dto;
 
 import java.util.List;
 
-public class SolicitudRequest {
+/**
+ * DTO para crear una solicitud con documentos y tramiteLicencias asociadas
+ */
+public class SolicitudConDocumentosRequest {
 
     private Long idTramite;
     private Integer rut;
     private Long idSaludFormulario;
-    private List<String> clases; // Campo simplificado
-    private List<Long> idTramiteLicencias; // IDs de las clases de licencia seleccionadas
+    private List<String> clases;
+    private List<Long> idTramiteLicencias;
+    private List<Long> idDocumentosTramite; // IDs de tipos de documentos requeridos
 
-    public SolicitudRequest() {
+    public SolicitudConDocumentosRequest() {
     }
 
-    public SolicitudRequest(Long idTramite, Integer rut, List<String> clases) {
-        this.idTramite = idTramite;
-        this.rut = rut;
-        this.clases = clases;
-    }
-
-    public SolicitudRequest(Long idTramite, Integer rut, List<String> clases, List<Long> idTramiteLicencias) {
+    public SolicitudConDocumentosRequest(Long idTramite, Integer rut, List<String> clases,
+            List<Long> idTramiteLicencias, List<Long> idDocumentosTramite) {
         this.idTramite = idTramite;
         this.rut = rut;
         this.clases = clases;
         this.idTramiteLicencias = idTramiteLicencias;
+        this.idDocumentosTramite = idDocumentosTramite;
     }
 
     // Getters y Setters
@@ -66,5 +66,13 @@ public class SolicitudRequest {
 
     public void setIdTramiteLicencias(List<Long> idTramiteLicencias) {
         this.idTramiteLicencias = idTramiteLicencias;
+    }
+
+    public List<Long> getIdDocumentosTramite() {
+        return idDocumentosTramite;
+    }
+
+    public void setIdDocumentosTramite(List<Long> idDocumentosTramite) {
+        this.idDocumentosTramite = idDocumentosTramite;
     }
 }

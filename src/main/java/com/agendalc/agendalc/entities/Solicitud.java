@@ -14,6 +14,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -24,6 +26,7 @@ public class Solicitud {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_solicitud")
     private Long idSolicitud;
 
     @Column(nullable = false)
@@ -54,6 +57,14 @@ public class Solicitud {
 
     @OneToOne(mappedBy = "solicitud", cascade = CascadeType.ALL, orphanRemoval = true)
     private SolcitudRechazo solcitudRehazo;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "solicitud_tramite_licencia",
+        joinColumns = @JoinColumn(name = "solicitud_id"),
+        inverseJoinColumns = @JoinColumn(name = "tramite_licencia_id")
+    )
+    private Set<TramiteLicencia> tramiteLicencias = new HashSet<>();
 
     public enum EstadoSolicitud {
         PENDIENTE,
@@ -192,6 +203,22 @@ public class Solicitud {
             return this.solcitudRehazo.getMotivoRechazo();
         }
         return null;
+    }
+
+    public Set<TramiteLicencia> getTramiteLicencias() {
+        return tramiteLicencias;
+    }
+
+    public void setTramiteLicencias(Set<TramiteLicencia> tramiteLicencias) {
+        this.tramiteLicencias = tramiteLicencias;
+    }
+
+    public void addTramiteLicencia(TramiteLicencia tramiteLicencia) {
+        this.tramiteLicencias.add(tramiteLicencia);
+    }
+
+    public void removeTramiteLicencia(TramiteLicencia tramiteLicencia) {
+        this.tramiteLicencias.remove(tramiteLicencia);
     }
 
 }

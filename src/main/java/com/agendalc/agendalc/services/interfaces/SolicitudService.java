@@ -21,7 +21,7 @@ public interface SolicitudService {
 
     List<SolicitudResponseList> getSolicitudesByRut(Integer rut);
 
-    SolicitudResponse createSolicitud(SolicitudRequest request, MultipartFile[] files) throws IOException;
+    SolicitudResponse createSolicitud(SolicitudRequest request) throws IOException;
 
     List<SolicitudResponseList> getSolicitudesByRutFunc(Integer rut);
 

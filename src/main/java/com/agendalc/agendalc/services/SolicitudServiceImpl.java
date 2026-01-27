@@ -3,8 +3,11 @@ package com.agendalc.agendalc.services;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.EnumSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +16,6 @@ import com.agendalc.agendalc.dto.MovimientoSolicitudRequest;
 import com.agendalc.agendalc.dto.SolicitudRequest;
 import com.agendalc.agendalc.dto.SolicitudResponse;
 import com.agendalc.agendalc.dto.SolicitudResponseList;
-import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.MovimientoSolicitud;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.SolcitudRechazo;
@@ -23,11 +25,11 @@ import com.agendalc.agendalc.entities.TramiteLicencia;
 import com.agendalc.agendalc.entities.MovimientoSolicitud.TipoMovimiento;
 import com.agendalc.agendalc.entities.Solicitud.EstadoSolicitud;
 import com.agendalc.agendalc.entities.enums.ClaseLicencia;
-import com.agendalc.agendalc.repositories.CitaRepository;
 import com.agendalc.agendalc.repositories.SaludFormularioRepository;
 import com.agendalc.agendalc.repositories.SolicitudRechazoRepository;
 import com.agendalc.agendalc.repositories.SolicitudRepository;
 import com.agendalc.agendalc.repositories.TramiteRepository;
+import com.agendalc.agendalc.repositories.TramiteLicenciaRepository;
 import com.agendalc.agendalc.services.interfaces.MovimientoSolicitudService;
 import com.agendalc.agendalc.services.interfaces.NotificacionService;
 import com.agendalc.agendalc.services.interfaces.SolicitudDocumentoService;
@@ -39,35 +41,38 @@ import com.agendalc.agendalc.utils.RepositoryUtils;
 @Service
 public class SolicitudServiceImpl implements SolicitudService {
 
+    private static final Logger logger = LoggerFactory.getLogger(SolicitudServiceImpl.class);
+
     private final SolicitudRepository solicitudRepository;
     private final TramiteRepository tramiteRepository;
     private final MovimientoSolicitudService movimientoSolicitudService;
     private final SaludFormularioRepository saludFormularioRepository;
-    private final CitaRepository citaRepository;
     private final SolicitudMapper solicitudMapper;
     private final NotificacionService notificacionService;
     private final SolicitudRechazoRepository solicitudRechazoRepository;
     private final SolicitudResponseTransformer responseTransformer;
     private final SolicitudDocumentoService solicitudDocumentoService;
+    private final TramiteLicenciaRepository tramiteLicenciaRepository;
 
     public SolicitudServiceImpl(SolicitudRepository solicitudCitaRepository,
             TramiteRepository tramiteRepository,
             MovimientoSolicitudService movimientoSolicitudService,
-            SaludFormularioRepository saludFormularioRepository, CitaRepository citaRepository,
+            SaludFormularioRepository saludFormularioRepository, 
             SolicitudMapper solicitudMapper, NotificacionService notificacionService,
             SolicitudRechazoRepository solicitudRechazoRepository,
             SolicitudResponseTransformer responseTransformer,
-            SolicitudDocumentoService solicitudDocumentoService) {
+            SolicitudDocumentoService solicitudDocumentoService,
+            TramiteLicenciaRepository tramiteLicenciaRepository) {
         this.solicitudRepository = solicitudCitaRepository;
         this.tramiteRepository = tramiteRepository;
         this.movimientoSolicitudService = movimientoSolicitudService;
         this.saludFormularioRepository = saludFormularioRepository;
-        this.citaRepository = citaRepository;
         this.solicitudMapper = solicitudMapper;
         this.notificacionService = notificacionService;
         this.solicitudRechazoRepository = solicitudRechazoRepository;
         this.responseTransformer = responseTransformer;
         this.solicitudDocumentoService = solicitudDocumentoService;
+        this.tramiteLicenciaRepository = tramiteLicenciaRepository;
     }
 
     @Override
@@ -116,7 +121,9 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     @Transactional
-    public SolicitudResponse createSolicitud(SolicitudRequest request, MultipartFile[] files) throws IOException {
+    public SolicitudResponse createSolicitud(SolicitudRequest request) throws IOException {
+        logger.info("Iniciando creación de solicitud para RUT: {}", request.getRut());
+        
         Tramite tramite = getTramiteById(request.getIdTramite());
         Solicitud solicitud = solicitudMapper.toEntity(request, tramite);
 
@@ -125,43 +132,104 @@ public class SolicitudServiceImpl implements SolicitudService {
         MovimientoSolicitud primerMovimiento = firstMovement(solicitud, TipoMovimiento.CREACION);
         solicitud.addMovimiento(primerMovimiento);
 
-        // Guardar la solicitud para obtener un ID antes de asociar documentos
+        // Guardar la solicitud para obtener un ID
         Solicitud savedSolicitud = solicitudRepository.save(solicitud);
+        solicitudRepository.flush();
+        logger.info("Solicitud guardada con ID: {}", savedSolicitud.getIdSolicitud());
 
-        // Procesar y guardar documentos si existen
-        if (files != null && files.length > 0) {
-            if (request.getDocumentos() == null || request.getDocumentos().size() != files.length) {
-                throw new IllegalArgumentException("La cantidad de archivos no coincide con la cantidad de tipos de documento especificados.");
-            }
-            // Asignar los archivos a los documentos subidos
-            for (int i = 0; i < files.length; i++) {
-                request.getDocumentos().get(i).setFile(files[i]);
-            }
-            solicitudDocumentoService.guardarDocumentosNuevos(savedSolicitud, tramite, request.getDocumentos());
+        // Asociar licencias por ID
+        asociarTramiteLicenciasPorId(savedSolicitud, request.getIdTramiteLicencias());
+
+        // Asociar clases de licencia
+        asociarClasesLicencia(savedSolicitud, request.getClases(), tramite);
+
+        try {
+            notificacionService.enviarNotificacionSolicitudCreada(savedSolicitud);
+        } catch (Exception e) {
+            logger.warn("Error al enviar la notificación por correo para la solicitud creada con ID: {}. La solicitud se creó igualmente.", savedSolicitud.getIdSolicitud(), e);
         }
-
-        // Procesar y guardar clases de licencia si existen
-        if (request.getClases() != null && !request.getClases().isEmpty()) {
-            for (String claseStr : request.getClases()) {
-                try {
-                    ClaseLicencia claseLicencia = ClaseLicencia.valueOf(claseStr.trim().toUpperCase());
-                    TramiteLicencia tramiteLicencia = new TramiteLicencia();
-                    tramiteLicencia.setClaseLicencia(claseLicencia);
-                    tramiteLicencia.setTramite(tramite);
-                    tramite.getClasesLicencia().add(tramiteLicencia);
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException("Clase de licencia inválida: " + claseStr);
-                }
-            }
-            // La cascada (CascadeType.ALL) en la entidad Tramite se encargará de persistir los TramiteLicencia
-            tramiteRepository.save(tramite);
-        }
-
-        asociarCita(savedSolicitud, request.getIdCita());
-
-        notificacionService.enviarNotificacionSolicitudCreada(savedSolicitud);
+        
+        logger.info("Solicitud creada exitosamente con ID: {}", savedSolicitud.getIdSolicitud());
 
         return solicitudMapper.mapSolicitudResponse(savedSolicitud);
+    }
+
+    private void asociarTramiteLicenciasPorId(Solicitud solicitud, List<Long> idTramiteLicencias) {
+        if (idTramiteLicencias == null || idTramiteLicencias.isEmpty()) {
+            return;
+        }
+        
+        logger.info("Asociando {} tramiteLicencias a la solicitud {}", idTramiteLicencias.size(), solicitud.getIdSolicitud());
+        
+        List<TramiteLicencia> licenciasAAsociar = new ArrayList<>();
+        
+        for (Long idTramiteLicencia : idTramiteLicencias) {
+            TramiteLicencia tramiteLicencia = tramiteLicenciaRepository.findById(idTramiteLicencia)
+                    .orElseThrow(() -> {
+                        logger.error("TramiteLicencia no encontrada: {}", idTramiteLicencia);
+                        return new IllegalArgumentException("TramiteLicencia no encontrada: " + idTramiteLicencia);
+                    });
+            
+            logger.debug("TramiteLicencia encontrada: id={}, clase={}", idTramiteLicencia, tramiteLicencia.getClaseLicencia());
+            licenciasAAsociar.add(tramiteLicencia);
+        }
+        
+        for (TramiteLicencia licencia : licenciasAAsociar) {
+            solicitud.getTramiteLicencias().add(licencia);
+            logger.debug("TramiteLicencia {} agregada al conjunto", licencia.getId());
+        }
+        
+        logger.info("Total de licencias en memoria antes de guardar: {}", solicitud.getTramiteLicencias().size());
+        
+        Solicitud actualizada = solicitudRepository.save(solicitud);
+        solicitudRepository.flush();
+        
+        logger.info("Después de flush - Licencias en BD: {}", actualizada.getTramiteLicencias().size());
+        for (TramiteLicencia lic : actualizada.getTramiteLicencias()) {
+            logger.debug("Licencia en BD: id={}, clase={}", lic.getId(), lic.getClaseLicencia());
+        }
+    }
+
+    private void asociarClasesLicencia(Solicitud solicitud, List<String> clases, Tramite tramite) {
+        if (clases == null || clases.isEmpty()) {
+            return;
+        }
+        
+        logger.info("Buscando {} clases de licencia en el enumerador", clases.size());
+        
+        List<TramiteLicencia> tramiteLicenciasDelTramite = tramiteLicenciaRepository.findByTramite(tramite);
+        logger.debug("TramiteLicencias disponibles en tramite {}: {}", tramite.getIdTramite(), tramiteLicenciasDelTramite.size());
+        
+        for (String claseStr : clases) {
+            procesarClaseLicencia(solicitud, claseStr, tramite, tramiteLicenciasDelTramite);
+        }
+        
+        solicitud = solicitudRepository.save(solicitud);
+        solicitudRepository.flush();
+        
+        logger.info("Solicitud actualizada. Total de licencias asociadas: {}", solicitud.getTramiteLicencias().size());
+    }
+
+    private void procesarClaseLicencia(Solicitud solicitud, String claseStr, Tramite tramite, List<TramiteLicencia> tramiteLicenciasDelTramite) {
+        try {
+            ClaseLicencia claseLicencia = ClaseLicencia.valueOf(claseStr.trim().toUpperCase());
+            logger.debug("Buscando clase {} en enumerador ClaseLicencia", claseLicencia);
+            
+            TramiteLicencia tramiteLicenciaEncontrada = tramiteLicenciasDelTramite.stream()
+                    .filter(tl -> tl.getClaseLicencia() == claseLicencia)
+                    .findFirst()
+                    .orElse(null);
+            
+            if (tramiteLicenciaEncontrada != null) {
+                logger.info("Clase {} encontrada: id={}, agregando a solicitud", claseLicencia, tramiteLicenciaEncontrada.getId());
+                solicitud.getTramiteLicencias().add(tramiteLicenciaEncontrada);
+            } else {
+                logger.warn("Clase {} no encontrada en tramite {}", claseLicencia, tramite.getIdTramite());
+            }
+        } catch (IllegalArgumentException e) {
+            logger.error("Clase de licencia inválida: {}", claseStr);
+            throw new IllegalArgumentException("Clase de licencia inválida: " + claseStr);
+        }
     }
 
     private void asociarSaludFormulario(Solicitud solicitud, Long idSaludFormulario) {
@@ -170,15 +238,6 @@ public class SolicitudServiceImpl implements SolicitudService {
                     saludFormularioRepository.findById(idSaludFormulario),
                     "SaludFormulario no encontrado con id: " + idSaludFormulario);
             solicitud.setSaludFormulario(saludFormulario);
-        }
-    }
-
-    private void asociarCita(Solicitud solicitud, Long idCita) {
-        if (idCita != null) {
-            Cita cita = RepositoryUtils.findOrThrow(citaRepository.findById(idCita),
-                    "Cita no encontrada con id: " + idCita);
-            cita.setSolicitud(solicitud);
-            citaRepository.save(cita);
         }
     }
 

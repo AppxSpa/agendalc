@@ -1,5 +1,6 @@
 package com.agendalc.agendalc.entities;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,7 +38,7 @@ public class Tramite {
     private List<TramiteEtapa> tramiteEtapas;
 
     @OneToMany(mappedBy = "tramite", cascade = CascadeType.ALL, orphanRemoval = true, fetch = jakarta.persistence.FetchType.LAZY)
-    private Set<TramiteLicencia> clasesLicencia = new java.util.HashSet<>();
+    private Set<TramiteLicencia> clasesLicencia = new HashSet<>();
 
     private boolean pideDocumentos;
 

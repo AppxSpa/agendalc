@@ -1,8 +1,9 @@
 package com.agendalc.agendalc.services;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class ApiMailServiceImpl implements ApiMailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ApiMailServiceImpl.class);
 
     private final WebClient webClientMail;
 
@@ -42,10 +45,14 @@ public class ApiMailServiceImpl implements ApiMailService {
                                     .flatMap(error -> Mono.error(new RuntimeException("Error en la API: " + error))))
                     .bodyToMono(Void.class)
                     .block();
+            logger.info("Email enviado exitosamente a: {} con asunto: {}", to, subject);
 
         } catch (WebClientResponseException e) {
-            HashMap<String, String> response = new HashMap<>();
-            response.put("message", e.getMessage());
+            logger.error("Error en WebClient al enviar email a: {} con asunto: {} - Error: {}", 
+                    to, subject, e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Error inesperado al enviar email a: {} con asunto: {} - Error: {}", 
+                    to, subject, e.getMessage(), e);
         }
     }
 

@@ -1,5 +1,8 @@
 package com.agendalc.agendalc.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.agendalc.agendalc.entities.enums.ClaseLicencia;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -12,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -32,7 +36,9 @@ public class TramiteLicencia {
     @JsonIgnore
     private Tramite tramite;
 
-    // Getters and Setters
+    @ManyToMany(mappedBy = "tramiteLicencias", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Solicitud> solicitudes = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -56,5 +62,13 @@ public class TramiteLicencia {
 
     public void setTramite(Tramite tramite) {
         this.tramite = tramite;
+    }
+
+    public Set<Solicitud> getSolicitudes() {
+        return solicitudes;
+    }
+
+    public void setSolicitudes(Set<Solicitud> solicitudes) {
+        this.solicitudes = solicitudes;
     }
 }
