@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import com.agendalc.agendalc.entities.AsistenciaCita;
 import com.agendalc.agendalc.services.interfaces.AsistenciaCitaService;
 
 @RestController
@@ -26,10 +25,9 @@ public class AsistenciaController {
     @PostMapping("/registrar")
     public ResponseEntity<Object> registrarAsistencia(@RequestParam Long citaId) {
 
-        AsistenciaCita asistenciaCita = asistenciaCitaService.registrarAsistencia(citaId);
+    asistenciaCitaService.registrarAsistencia(citaId);
         return ResponseEntity.ok(Map.of(
-                "mensaje", "Asistencia registrada con éxito",
-                "asistenciaCita", asistenciaCita));
+                "mensaje", "Asistencia registrada con éxito"));
     }
 
 }
