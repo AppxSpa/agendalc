@@ -19,10 +19,12 @@ public class SolicitudResponseTransformerImpl implements SolicitudResponseTransf
 
     private final CitaRepository citaRepository;
     private final SolicitudMapper solicitudMapper;
+    private final com.agendalc.agendalc.services.mappers.saludmappers.SaludFormularioMapper saludFormularioMapper;
 
-    public SolicitudResponseTransformerImpl(CitaRepository citaRepository, SolicitudMapper solicitudMapper) {
+    public SolicitudResponseTransformerImpl(CitaRepository citaRepository, SolicitudMapper solicitudMapper, com.agendalc.agendalc.services.mappers.saludmappers.SaludFormularioMapper saludFormularioMapper) {
         this.citaRepository = citaRepository;
         this.solicitudMapper = solicitudMapper;
+        this.saludFormularioMapper = saludFormularioMapper;
     }
 
     @Override
@@ -37,8 +39,31 @@ public class SolicitudResponseTransformerImpl implements SolicitudResponseTransf
         // 2. Enriquecimiento con datos de Cita
         enrichWithCitaData(responseList, solicitudes);
 
-        
+        // 3. Enriquecimiento con datos de Salud y Clases
+        enrichWithExtraData(responseList, solicitudes);
+
         return responseList;
+    }
+
+    private void enrichWithExtraData(List<SolicitudResponseList> responseList, List<Solicitud> solicitudes) {
+        Map<Long, SolicitudResponseList> responseMap = responseList.stream()
+                .collect(Collectors.toMap(SolicitudResponseList::getIdSolicitud, Function.identity()));
+
+        for (Solicitud solicitud : solicitudes) {
+            SolicitudResponseList responseDto = responseMap.get(solicitud.getIdSolicitud());
+            if (responseDto == null) continue;
+
+            // Mapeo de SaludFormulario
+            if (solicitud.getSaludFormulario() != null) {
+                responseDto.setSaludFormularioDto(saludFormularioMapper.toDto(solicitud.getSaludFormulario()));
+            }
+
+            // Mapeo de Clases
+            String clases = solicitud.getTramiteLicencias().stream()
+                    .map(tl -> tl.getClaseLicencia().name())
+                    .collect(Collectors.joining(", "));
+            responseDto.setClases(clases);
+        }
     }
 
     private void enrichWithCitaData(List<SolicitudResponseList> responseList, List<Solicitud> solicitudes) {

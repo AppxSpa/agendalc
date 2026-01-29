@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.agendalc.agendalc.entities.AsistenciaCita;
 import com.agendalc.agendalc.entities.Cita;
-import com.agendalc.agendalc.repositories.AsistenciaCitaRepository;
+import com.agendalc.agendalc.repositories.AsistenciaRepository;
 import com.agendalc.agendalc.repositories.CitaRepository;
 import com.agendalc.agendalc.services.interfaces.AsistenciaCitaService;
 import com.agendalc.agendalc.utils.RelojUtils;
@@ -14,9 +14,9 @@ import com.agendalc.agendalc.utils.RelojUtils;
 public class AsistenciaCitaServiceImpl implements AsistenciaCitaService {
 
     private final CitaRepository citaRepository;
-    private final AsistenciaCitaRepository asistenciaCitaRepository;
+    private final AsistenciaRepository asistenciaCitaRepository;
 
-    public AsistenciaCitaServiceImpl(CitaRepository citaRepository, AsistenciaCitaRepository asistenciaCitaRepository) {
+    public AsistenciaCitaServiceImpl(CitaRepository citaRepository, AsistenciaRepository asistenciaCitaRepository) {
         this.citaRepository = citaRepository;
         this.asistenciaCitaRepository = asistenciaCitaRepository;
     }

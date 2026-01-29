@@ -12,7 +12,7 @@ import com.agendalc.agendalc.dto.IndicadoresDto;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.Tramite;
 import com.agendalc.agendalc.exceptions.NotFounException;
-import com.agendalc.agendalc.repositories.AsistenciaCitaRepository;
+import com.agendalc.agendalc.repositories.AsistenciaRepository;
 import com.agendalc.agendalc.repositories.CitaRepository;
 import com.agendalc.agendalc.repositories.TramiteRepository;
 import com.agendalc.agendalc.services.interfaces.DashboardService;
@@ -22,11 +22,11 @@ import com.agendalc.agendalc.services.mappers.DetalleAgedamientoMapper;
 public class DashboardServiceImpl implements DashboardService {
 
     private final CitaRepository citaRepository;
-    private final AsistenciaCitaRepository asistenciaCitaRepository;
+    private final AsistenciaRepository asistenciaCitaRepository;
     private final DetalleAgedamientoMapper detalleAgedamientoMapper;
     private final TramiteRepository tramiteRepository;
 
-    public DashboardServiceImpl(CitaRepository citaRepository, AsistenciaCitaRepository asistenciaCitaRepository,
+    public DashboardServiceImpl(CitaRepository citaRepository, AsistenciaRepository asistenciaCitaRepository,
             DetalleAgedamientoMapper detalleAgedamientoMapper, TramiteRepository tramiteRepository) {
         this.citaRepository = citaRepository;
         this.asistenciaCitaRepository = asistenciaCitaRepository;

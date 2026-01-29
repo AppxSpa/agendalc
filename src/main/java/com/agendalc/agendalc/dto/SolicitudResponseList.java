@@ -19,6 +19,8 @@ public class SolicitudResponseList {
     private Set<DocumentosDto> documentos;
     private CitaAsociadaDto cita;
     private RechazoDto rechazo;
+    private SaludFormularioDto saludFormularioDto;
+    private String clases;
 
     public RechazoDto getRechazo() {
         return rechazo;
@@ -130,6 +132,22 @@ public class SolicitudResponseList {
 
     public void setDocumentos(Set<DocumentosDto> documentos) {
         this.documentos = documentos;
+    }
+
+    public SaludFormularioDto getSaludFormularioDto() {
+        return saludFormularioDto;
+    }
+
+    public void setSaludFormularioDto(SaludFormularioDto saludFormularioDto) {
+        this.saludFormularioDto = saludFormularioDto;
+    }
+
+    public String getClases() {
+        return clases;
+    }
+
+    public void setClases(String clases) {
+        this.clases = clases;
     }
 
 }

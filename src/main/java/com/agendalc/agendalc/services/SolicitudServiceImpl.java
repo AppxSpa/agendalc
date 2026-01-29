@@ -80,9 +80,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         List<Solicitud> solicitudes = solicitudRepository
                 .findByFechaSolicitudYearWithMovimientosOrdered(year);
 
-        return responseTransformer.transform(solicitudes).stream()
-                .filter(sol -> sol.getEstadoSolicitud().equals(EstadoSolicitud.PENDIENTE.toString()))
-                .toList();
+        return responseTransformer.transform(solicitudes);
     }
 
     @Transactional

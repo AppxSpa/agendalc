@@ -8,18 +8,18 @@ import org.springframework.stereotype.Component;
 import com.agendalc.agendalc.dto.DetalleAgendamientoContribuyente;
 import com.agendalc.agendalc.dto.PersonaResponse;
 import com.agendalc.agendalc.entities.Cita;
-import com.agendalc.agendalc.repositories.AsistenciaCitaRepository;
+import com.agendalc.agendalc.repositories.AsistenciaRepository;
 import com.agendalc.agendalc.services.interfaces.ApiPersonaService;
 
 @Component
 public class DetalleAgedamientoMapper {
 
-    private final AsistenciaCitaRepository asistenciaCitaRepository;
+    private final AsistenciaRepository asistenciaCitaRepository;
 
     private final ApiPersonaService apiPersonaService;
 
     public DetalleAgedamientoMapper(ApiPersonaService apiPersonaService,
-            AsistenciaCitaRepository asistenciaCitaRepository) {
+            AsistenciaRepository asistenciaCitaRepository) {
         this.apiPersonaService = apiPersonaService;
         this.asistenciaCitaRepository = asistenciaCitaRepository;
     }
