@@ -29,7 +29,7 @@ public class DigitalizacionController {
     @PreAuthorize("hasRole('FUNC')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> digitalizarDocumentos(
-            @RequestPart("request") DigitalizacionRequest request,
+            @ModelAttribute("request") DigitalizacionRequest request,
             @RequestPart("files") List<MultipartFile> files) {
 
         if (files == null || files.isEmpty()) {
