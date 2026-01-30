@@ -1,8 +1,6 @@
 package com.agendalc.agendalc.services;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -215,10 +213,7 @@ public class CitaServiceImpl implements CitaService {
     public List<CitaDto> getCitaBetweenDates(LocalDate fechaInicio,
             LocalDate fechaFin) {
 
-        LocalDateTime fechaHoraInicio = fechaInicio.atStartOfDay();
-        LocalDateTime fechaHoraFin = fechaFin.atTime(LocalTime.MAX);
-
-        List<Cita> citas = citaRepository.findByFechaHoraBetween(fechaHoraInicio, fechaHoraFin);
+        List<Cita> citas = citaRepository.findByAgenda_FechaBetween(fechaInicio, fechaFin);
 
         return citaMapper.toDtoList(citas);
     }

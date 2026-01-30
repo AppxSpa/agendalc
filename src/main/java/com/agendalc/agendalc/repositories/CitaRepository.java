@@ -36,6 +36,8 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     Optional<Cita> findByRutAndAgenda_Fecha(Integer rut, LocalDate fecha);
 
+    List<Cita> findByAgenda_FechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
+
     // Métodos descubiertos por el compilador de Maven
     Optional<Cita> findBySolicitud(Solicitud solicitud);
 

@@ -8,6 +8,7 @@ import com.agendalc.agendalc.entities.Agenda;
 
 @Repository
 public interface AgendaRepository extends JpaRepository<Agenda, Long> {
+    
 
 
 }
