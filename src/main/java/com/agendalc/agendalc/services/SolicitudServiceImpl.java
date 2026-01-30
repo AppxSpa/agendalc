@@ -57,7 +57,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     public SolicitudServiceImpl(SolicitudRepository solicitudCitaRepository,
             TramiteRepository tramiteRepository,
             MovimientoSolicitudService movimientoSolicitudService,
-            SaludFormularioRepository saludFormularioRepository, 
+            SaludFormularioRepository saludFormularioRepository,
             SolicitudMapper solicitudMapper, NotificacionService notificacionService,
             SolicitudRechazoRepository solicitudRechazoRepository,
             SolicitudResponseTransformer responseTransformer,
@@ -80,7 +80,10 @@ public class SolicitudServiceImpl implements SolicitudService {
         List<Solicitud> solicitudes = solicitudRepository
                 .findByFechaSolicitudYearWithMovimientosOrdered(year);
 
-        return responseTransformer.transform(solicitudes);
+        return responseTransformer.transform(solicitudes).stream()
+                .filter(sol -> sol.getEstadoSolicitud().equals(EstadoSolicitud.PENDIENTE.toString()))
+                .toList();
+
     }
 
     @Transactional
@@ -121,7 +124,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Transactional
     public SolicitudResponse createSolicitud(SolicitudRequest request) throws IOException {
         logger.info("Iniciando creación de solicitud para RUT: {}", request.getRut());
-        
+
         Tramite tramite = getTramiteById(request.getIdTramite());
         Solicitud solicitud = solicitudMapper.toEntity(request, tramite);
 
@@ -144,9 +147,11 @@ public class SolicitudServiceImpl implements SolicitudService {
         try {
             notificacionService.enviarNotificacionSolicitudCreada(savedSolicitud);
         } catch (Exception e) {
-            logger.warn("Error al enviar la notificación por correo para la solicitud creada con ID: {}. La solicitud se creó igualmente.", savedSolicitud.getIdSolicitud(), e);
+            logger.warn(
+                    "Error al enviar la notificación por correo para la solicitud creada con ID: {}. La solicitud se creó igualmente.",
+                    savedSolicitud.getIdSolicitud(), e);
         }
-        
+
         logger.info("Solicitud creada exitosamente con ID: {}", savedSolicitud.getIdSolicitud());
 
         return solicitudMapper.mapSolicitudResponse(savedSolicitud);
@@ -156,32 +161,34 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (idTramiteLicencias == null || idTramiteLicencias.isEmpty()) {
             return;
         }
-        
-        logger.info("Asociando {} tramiteLicencias a la solicitud {}", idTramiteLicencias.size(), solicitud.getIdSolicitud());
-        
+
+        logger.info("Asociando {} tramiteLicencias a la solicitud {}", idTramiteLicencias.size(),
+                solicitud.getIdSolicitud());
+
         List<TramiteLicencia> licenciasAAsociar = new ArrayList<>();
-        
+
         for (Long idTramiteLicencia : idTramiteLicencias) {
             TramiteLicencia tramiteLicencia = tramiteLicenciaRepository.findById(idTramiteLicencia)
                     .orElseThrow(() -> {
                         logger.error("TramiteLicencia no encontrada: {}", idTramiteLicencia);
                         return new IllegalArgumentException("TramiteLicencia no encontrada: " + idTramiteLicencia);
                     });
-            
-            logger.debug("TramiteLicencia encontrada: id={}, clase={}", idTramiteLicencia, tramiteLicencia.getClaseLicencia());
+
+            logger.debug("TramiteLicencia encontrada: id={}, clase={}", idTramiteLicencia,
+                    tramiteLicencia.getClaseLicencia());
             licenciasAAsociar.add(tramiteLicencia);
         }
-        
+
         for (TramiteLicencia licencia : licenciasAAsociar) {
             solicitud.getTramiteLicencias().add(licencia);
             logger.debug("TramiteLicencia {} agregada al conjunto", licencia.getId());
         }
-        
+
         logger.info("Total de licencias en memoria antes de guardar: {}", solicitud.getTramiteLicencias().size());
-        
+
         Solicitud actualizada = solicitudRepository.save(solicitud);
         solicitudRepository.flush();
-        
+
         logger.info("Después de flush - Licencias en BD: {}", actualizada.getTramiteLicencias().size());
         for (TramiteLicencia lic : actualizada.getTramiteLicencias()) {
             logger.debug("Licencia en BD: id={}, clase={}", lic.getId(), lic.getClaseLicencia());
@@ -192,34 +199,37 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (clases == null || clases.isEmpty()) {
             return;
         }
-        
+
         logger.info("Buscando {} clases de licencia en el enumerador", clases.size());
-        
+
         List<TramiteLicencia> tramiteLicenciasDelTramite = tramiteLicenciaRepository.findByTramite(tramite);
-        logger.debug("TramiteLicencias disponibles en tramite {}: {}", tramite.getIdTramite(), tramiteLicenciasDelTramite.size());
-        
+        logger.debug("TramiteLicencias disponibles en tramite {}: {}", tramite.getIdTramite(),
+                tramiteLicenciasDelTramite.size());
+
         for (String claseStr : clases) {
             procesarClaseLicencia(solicitud, claseStr, tramite, tramiteLicenciasDelTramite);
         }
-        
+
         solicitud = solicitudRepository.save(solicitud);
         solicitudRepository.flush();
-        
+
         logger.info("Solicitud actualizada. Total de licencias asociadas: {}", solicitud.getTramiteLicencias().size());
     }
 
-    private void procesarClaseLicencia(Solicitud solicitud, String claseStr, Tramite tramite, List<TramiteLicencia> tramiteLicenciasDelTramite) {
+    private void procesarClaseLicencia(Solicitud solicitud, String claseStr, Tramite tramite,
+            List<TramiteLicencia> tramiteLicenciasDelTramite) {
         try {
             ClaseLicencia claseLicencia = ClaseLicencia.valueOf(claseStr.trim().toUpperCase());
             logger.debug("Buscando clase {} en enumerador ClaseLicencia", claseLicencia);
-            
+
             TramiteLicencia tramiteLicenciaEncontrada = tramiteLicenciasDelTramite.stream()
                     .filter(tl -> tl.getClaseLicencia() == claseLicencia)
                     .findFirst()
                     .orElse(null);
-            
+
             if (tramiteLicenciaEncontrada != null) {
-                logger.info("Clase {} encontrada: id={}, agregando a solicitud", claseLicencia, tramiteLicenciaEncontrada.getId());
+                logger.info("Clase {} encontrada: id={}, agregando a solicitud", claseLicencia,
+                        tramiteLicenciaEncontrada.getId());
                 solicitud.getTramiteLicencias().add(tramiteLicenciaEncontrada);
             } else {
                 logger.warn("Clase {} no encontrada en tramite {}", claseLicencia, tramite.getIdTramite());
