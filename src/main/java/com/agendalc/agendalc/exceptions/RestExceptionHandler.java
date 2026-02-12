@@ -52,6 +52,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
     }
 
+    @ExceptionHandler(OperacionNoPermitidaException.class)
+    public ResponseEntity<Object> handleOperacionNoPermitidaException(OperacionNoPermitidaException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(ERROR_KEY, ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

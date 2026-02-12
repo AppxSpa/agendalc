@@ -96,6 +96,7 @@ public class AgendaBloqueServiceImpl implements AgendaBloqueService {
             bloqueHorario.setHoraInicio(nuevoBloqueHorario.getHoraInicio());
             bloqueHorario.setHoraFin(nuevoBloqueHorario.getHoraFin());
             bloqueHorario.setCuposDisponibles(nuevoBloqueHorario.getCuposDisponibles());
+            bloqueHorario.setCuposTotales(nuevoBloqueHorario.getCuposTotales());
         }
 
         // Guardar todos los bloques en una sola operación
