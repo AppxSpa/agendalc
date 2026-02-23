@@ -17,6 +17,7 @@ import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
+import com.agendalc.agendalc.repositories.AsistenciaRepository;
 import com.agendalc.agendalc.services.interfaces.ApiPersonaService;
 
 @Component
@@ -24,10 +25,12 @@ public class CitaMapper {
 
     private final ApiPersonaService apiPersonaService;
     private final AppProperties appProperties;
+    private final AsistenciaRepository asistenciaCitaRepository;
 
-    public CitaMapper(ApiPersonaService apiPersonaService, AppProperties appProperties) {
+    public CitaMapper(ApiPersonaService apiPersonaService, AppProperties appProperties, AsistenciaRepository asistenciaCitaRepository) {
         this.apiPersonaService = apiPersonaService;
         this.appProperties = appProperties;
+        this.asistenciaCitaRepository = asistenciaCitaRepository;
     }
 
     public CitaDto toDto(Cita cita) {
@@ -45,6 +48,8 @@ public class CitaMapper {
 
         dto.setIdAgenda(cita.getAgenda().getIdAgenda());
         dto.setFechaHora(cita.getAgenda().getFecha());
+        dto.setEstadoAsistencia(isAsistente(cita.getIdCita()) ? "Asistente" : "No Asistente");
+
 
         if (cita.getSolicitud() != null) {
             Solicitud solicitud = cita.getSolicitud();
@@ -99,5 +104,9 @@ public class CitaMapper {
                 "tramite", cita.nombreTramite(),
                 "urlPlataforma", appProperties.getPlataformaUrl()
         );
+    }
+
+    private boolean isAsistente(Long citaId) {
+        return asistenciaCitaRepository.existsByCitaIdCita(citaId);
     }
 }

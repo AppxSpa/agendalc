@@ -9,6 +9,16 @@ public class CitaDto {
     private String nombres;
     private String paterno;
     private String materno;
+    private String estadoAsistencia;
+
+    public String getEstadoAsistencia() {
+        return estadoAsistencia;
+    }
+
+    public void setEstadoAsistencia(String estadoAsistencia) {
+        this.estadoAsistencia = estadoAsistencia;
+    }
+
 
     public String getDv() {
         return dv;
