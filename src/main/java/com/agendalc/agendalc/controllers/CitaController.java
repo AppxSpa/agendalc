@@ -3,11 +3,13 @@ package com.agendalc.agendalc.controllers;
 import com.agendalc.agendalc.dto.CitaDelDiaResponseDto;
 import com.agendalc.agendalc.dto.CitaDto;
 import com.agendalc.agendalc.dto.CitaRequest;
+import com.agendalc.agendalc.dto.DetalleAgendamientoContribuyente;
 import com.agendalc.agendalc.dto.DocumentoDto;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.exceptions.NotFounException;
 import com.agendalc.agendalc.services.interfaces.ArchivoService;
 import com.agendalc.agendalc.services.interfaces.CitaService;
+import com.agendalc.agendalc.services.interfaces.DashboardService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/agendalc/citas")
+@RequestMapping("")
 @CrossOrigin(origins = "https://dev.appx.cl/")
 public class CitaController {
 
@@ -33,11 +35,14 @@ public class CitaController {
     private final CitaService citaService;
     private final ArchivoService archivoService;
     private final ObjectMapper objectMapper;
+    private final DashboardService dashboardService;
 
-    public CitaController(CitaService citaService, ArchivoService archivoService, ObjectMapper objectMapper) {
+    public CitaController(CitaService citaService, ArchivoService archivoService, ObjectMapper objectMapper,
+            DashboardService dashboardService) {
         this.citaService = citaService;
         this.archivoService = archivoService;
         this.objectMapper = objectMapper;
+        this.dashboardService = dashboardService;
     }
 
     @PostMapping
@@ -161,6 +166,18 @@ public class CitaController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+
+    }
+
+    @GetMapping("/dias")
+    public ResponseEntity<Object> getCitasDia(@RequestParam LocalDate fecha) {
+
+        List<DetalleAgendamientoContribuyente> response = dashboardService.obtenerCitadosDeldia(fecha);
+
+        if (response.isEmpty())
+            return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "No se encontraron citas"));
+
+        return ResponseEntity.ok(response);
 
     }
 }

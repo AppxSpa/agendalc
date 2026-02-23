@@ -4,9 +4,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.agendalc.agendalc.dto.DeclaracionSaludResponse;
 import com.agendalc.agendalc.dto.SaludFormularioDto;
+import com.agendalc.agendalc.dto.SaludProfesionesDto;
 import com.agendalc.agendalc.services.interfaces.SaludService;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
@@ -38,11 +40,23 @@ public class SaludController {
     }
 
     @GetMapping("/declaraciones/{rut}")
-    public ResponseEntity<List<DeclaracionSaludResponse>> buscarDeclaracionesPorRut(@PathVariable Integer rut) {
+    public ResponseEntity<Object> buscarDeclaracionesPorRut(@PathVariable Integer rut) {
         List<DeclaracionSaludResponse> declaraciones = saludService.findDeclaracionesByRut(rut);
         if (declaraciones.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "No se encontraron declaraciones"));
         }
         return ResponseEntity.ok(declaraciones);
+    }
+
+    @GetMapping("/profesiones")
+    public ResponseEntity<Object> getProfesiones() {
+
+        List<SaludProfesionesDto> list = saludService.getProfesiones();
+        if (list.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "No se encontraron profesiones"));
+        }
+
+        return ResponseEntity.ok(list);
+
     }
 }

@@ -2,6 +2,7 @@ package com.agendalc.agendalc.services;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +10,7 @@ import com.agendalc.agendalc.dto.TramiteRequest;
 import com.agendalc.agendalc.dto.TramiteResponse;
 import com.agendalc.agendalc.entities.Tramite;
 import com.agendalc.agendalc.entities.TramiteLicencia;
+import com.agendalc.agendalc.exceptions.OperacionNoPermitidaException;
 import com.agendalc.agendalc.repositories.TramiteRepository;
 import com.agendalc.agendalc.services.interfaces.TramiteService;
 import com.agendalc.agendalc.services.mappers.TramiteMapper;
@@ -75,11 +77,15 @@ public class TramiteServiceImpl implements TramiteService {
 
     @Override
     public boolean deleteTramiteById(Long id) {
-        if (tramiteRepository.existsById(id)) {
+        if (!tramiteRepository.existsById(id)) {
+            return false;
+        }
+        try {
             tramiteRepository.deleteById(id);
             return true;
+        } catch (DataIntegrityViolationException e) {
+            throw new OperacionNoPermitidaException("No se puede eliminar el trámite porque tiene movimientos asociados.");
         }
-        return false;
     }
 
     @Transactional

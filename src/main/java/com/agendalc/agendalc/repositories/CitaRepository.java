@@ -48,4 +48,6 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
             LocalDateTime fin);
 
     List<Cita> findByFechaHoraBetweenAndAgendaTramite(LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, Tramite tramite);
+
+    
 }

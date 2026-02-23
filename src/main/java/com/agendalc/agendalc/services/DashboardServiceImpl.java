@@ -122,4 +122,14 @@ public class DashboardServiceImpl implements DashboardService {
         return tramiteRepository.findById(idTramite)
                 .orElseThrow(() -> new NotFounException("Trámite no encontrado con ID: " + idTramite));
     }
+
+    @Override
+    public List<DetalleAgendamientoContribuyente> obtenerCitadosDeldia(LocalDate fecha) {
+
+        List<Cita> citas = citaRepository.findByFechaHoraBetween(obtenerHoraInicioDia(fecha),
+                obtenerHoraFinDia(fecha));
+
+        return detalleAgedamientoMapper.detalleAgendamientoContribuyente(citas);
+
+    }
 }

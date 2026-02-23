@@ -9,8 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.agendalc.agendalc.dto.DeclaracionSaludResponse;
 import com.agendalc.agendalc.dto.SaludFormularioDto;
+import com.agendalc.agendalc.dto.SaludProfesionesDto;
 import com.agendalc.agendalc.entities.SaludFormulario;
+import com.agendalc.agendalc.entities.SaludProfesion;
 import com.agendalc.agendalc.repositories.SaludFormularioRepository;
+import com.agendalc.agendalc.repositories.SaludProfesionRepository;
 import com.agendalc.agendalc.services.interfaces.SaludService;
 import com.agendalc.agendalc.services.interfaces.FirmaService;
 import com.agendalc.agendalc.services.mappers.saludmappers.DeclaracionSaludResponseMapper;
@@ -26,16 +29,18 @@ public class SaludServiceImpl implements SaludService {
     private final FormularioDtoMapper formularioDtoMapper;
     private final DeclaracionSaludResponseMapper declaracionSaludResponseMapper;
     private final FirmaService firmaService;
+    private final SaludProfesionRepository saludProfesionRepository;
 
     public SaludServiceImpl(SaludFormularioRepository formularioRepository,
             SaludEntityMapper saludEntityMapper, FormularioDtoMapper formularioDtoMapper,
             DeclaracionSaludResponseMapper declaracionSaludResponseMapper,
-            FirmaService firmaService) {
+            FirmaService firmaService, SaludProfesionRepository saludProfesionRepository) {
         this.formularioRepository = formularioRepository;
         this.saludEntityMapper = saludEntityMapper;
         this.formularioDtoMapper = formularioDtoMapper;
         this.declaracionSaludResponseMapper = declaracionSaludResponseMapper;
         this.firmaService = firmaService;
+        this.saludProfesionRepository = saludProfesionRepository;
     }
 
     @Override
@@ -78,5 +83,19 @@ public class SaludServiceImpl implements SaludService {
         return formularios.stream()
                 .map(declaracionSaludResponseMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public List<SaludProfesionesDto> getProfesiones() {
+
+        List<SaludProfesion> list = saludProfesionRepository.findAll();
+
+        return list.stream().map(prof -> {
+            SaludProfesionesDto dto = new SaludProfesionesDto();
+            dto.setIdProfesion(prof.getId());
+            dto.setNombre(prof.getNombre());
+            return dto;
+        }).toList();
+
     }
 }
