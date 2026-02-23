@@ -9,9 +9,18 @@ import com.agendalc.agendalc.dto.BloqueHorarioResponse;
 import com.agendalc.agendalc.dto.DocumentosTramiteResponse;
 import com.agendalc.agendalc.dto.TramiteResponse;
 import com.agendalc.agendalc.entities.Agenda;
+import com.agendalc.agendalc.entities.BloqueHorario;
+import com.agendalc.agendalc.repositories.CitaRepository;
 
 @Component
 public class AgendaMapper {
+
+    private CitaRepository citaRepository;
+    
+
+    public AgendaMapper(CitaRepository citaRepository) {
+        this.citaRepository = citaRepository;
+    }
 
     public List<AgendaResponse> toAgendaResponseList(List<Agenda> agendas) {
         return agendas.stream().map(agenda -> {
@@ -42,6 +51,7 @@ public class AgendaMapper {
                 dto.setHoraInicio(bloque.getHoraInicio().toString());
                 dto.setCuposDisponibles(bloque.getCuposDisponibles());
                 dto.setCuposTotales(bloque.getCuposTotales());
+                dto.setCuposOcupados(calculateCuposOcupados(bloque));
                 return dto;
             }).toList();
 
@@ -50,6 +60,12 @@ public class AgendaMapper {
 
             return agendaResponse;
         }).toList();
+    }
+
+    private int calculateCuposOcupados(BloqueHorario bloqueHorario) {
+        return citaRepository.countByBloqueHorario(bloqueHorario);
+                
+
     }
 
 }

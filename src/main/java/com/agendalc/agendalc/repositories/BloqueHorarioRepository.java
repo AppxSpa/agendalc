@@ -8,4 +8,8 @@ import com.agendalc.agendalc.entities.BloqueHorario;
 @Repository
 public interface BloqueHorarioRepository extends JpaRepository<BloqueHorario, Long> {
 
+    
+
+    int countCuposTotalesByIdBloque(Long idBloque);
+
 }

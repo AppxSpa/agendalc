@@ -7,6 +7,7 @@ public class BloqueHorarioResponse {
     private String horaFin;
     private Integer cuposDisponibles;
     private Integer cuposTotales;
+    private Integer cuposOcupados;
 
     public BloqueHorarioResponse() {
     }
@@ -58,4 +59,14 @@ public class BloqueHorarioResponse {
         this.cuposDisponibles = cuposDisponibles;
     }
 
+    public Integer getCuposOcupados() {
+        return cuposOcupados;
+    }
+
+    public void setCuposOcupados(Integer cuposOcupados) {
+        this.cuposOcupados = cuposOcupados;
+    }
+
+
+    
 }

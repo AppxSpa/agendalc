@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.agendalc.agendalc.entities.BloqueHorario;
 import com.agendalc.agendalc.entities.Cita;
 import com.agendalc.agendalc.entities.SaludFormulario;
 import com.agendalc.agendalc.entities.Solicitud;
@@ -48,6 +49,8 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
             LocalDateTime fin);
 
     List<Cita> findByFechaHoraBetweenAndAgendaTramite(LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, Tramite tramite);
+
+    int countByBloqueHorario(BloqueHorario bloqueHorario);
 
     
 }
