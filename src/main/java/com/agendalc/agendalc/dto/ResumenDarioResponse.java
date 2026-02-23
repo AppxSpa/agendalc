@@ -1,15 +1,17 @@
 package com.agendalc.agendalc.dto;
 
+import java.util.List;
+
 public class ResumenDarioResponse {
 
     private Integer citados;
     private Integer asisetentes;
+    private List<CitaDto> citas;
 
-    
-
-    public ResumenDarioResponse(Integer citados, Integer asisetentes) {
+    public ResumenDarioResponse(Integer citados, Integer asisetentes, List<CitaDto> citas) {
         this.citados = citados;
         this.asisetentes = asisetentes;
+        this.citas = citas;
     }
 
     public Integer getCitados() {
@@ -28,4 +30,14 @@ public class ResumenDarioResponse {
         this.asisetentes = asisetentes;
     }
 
+    public List<CitaDto> getCitas() {
+        return citas;
+    }
+
+    public void setCitas(List<CitaDto> citas) {
+        this.citas = citas;
+    }
+
+
+    
 }
