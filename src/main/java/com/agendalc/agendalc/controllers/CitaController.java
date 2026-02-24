@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/api/agendalc/citas")
 @CrossOrigin(origins = "https://dev.appx.cl/")
 public class CitaController {
 
