@@ -52,5 +52,7 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     int countByBloqueHorario(BloqueHorario bloqueHorario);
 
+    int countByAgenda_Fecha(LocalDate fecha);
+
     
 }

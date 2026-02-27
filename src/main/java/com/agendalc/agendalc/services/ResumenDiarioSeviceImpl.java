@@ -33,11 +33,11 @@ public class ResumenDiarioSeviceImpl implements ResumenDiarioSevice {
     @Override
     public ResumenDarioResponse resumendiario(LocalDate fecha) {
 
-        int citados = citaRepository.countByFechaHoraBetween(fecha.atStartOfDay(), fecha.atTime(23, 59));
+        List<Agenda> agendas = agendaRepository.findByFecha(fecha);
+
+        int citados = citaRepository.countByAgenda_Fecha(fecha);
 
         int asistencias = asistenciaCitaRepository.countByCitaAgendaFecha(fecha);
-
-        List<Agenda> agendas = agendaRepository.findByFecha(fecha);
 
         List<CitaDto> citaDtos = agendas.stream()
                 .flatMap(agenda -> agenda.getCitas().stream())
@@ -47,7 +47,5 @@ public class ResumenDiarioSeviceImpl implements ResumenDiarioSevice {
         return new ResumenDarioResponse(citados, asistencias, citaDtos);
 
     }
-
-    
 
 }
