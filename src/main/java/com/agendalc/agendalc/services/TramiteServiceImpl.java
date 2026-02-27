@@ -1,6 +1,10 @@
 package com.agendalc.agendalc.services;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -10,6 +14,7 @@ import com.agendalc.agendalc.dto.TramiteRequest;
 import com.agendalc.agendalc.dto.TramiteResponse;
 import com.agendalc.agendalc.entities.Tramite;
 import com.agendalc.agendalc.entities.TramiteLicencia;
+import com.agendalc.agendalc.entities.enums.ClaseLicencia;
 import com.agendalc.agendalc.exceptions.OperacionNoPermitidaException;
 import com.agendalc.agendalc.repositories.TramiteRepository;
 import com.agendalc.agendalc.services.interfaces.TramiteService;
@@ -53,24 +58,45 @@ public class TramiteServiceImpl implements TramiteService {
         Tramite tramiteExistente = tramiteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No existe el trámite con id: " + id));
 
-        // Update simple fields
-        tramiteExistente.setNombre(request.getNombre().toUpperCase());
-        tramiteExistente.setDescripcion(request.getDescripcion());
+        if (!Objects.equals(
+                tramiteExistente.getNombre(), request.getNombre())) {
+
+            tramiteExistente.setNombre(request.getNombre().toUpperCase());
+        }
+
+        if (!Objects.equals(
+                tramiteExistente.getDescripcion(), request.getDescripcion())) {
+
+            tramiteExistente.setDescripcion(request.getDescripcion());
+        }
+
+        // Booleans (sin if innecesarios)
+        tramiteExistente.setActivo(request.isActivo());
         tramiteExistente.setPideDocumentos(request.isPideDocumentos());
         tramiteExistente.setRequiereSolicitud(request.isRequiereSolicitud());
         tramiteExistente.setRequiereAgenda(request.isRequiereAgenda());
-        tramiteExistente.setActivo(request.isActivo());
-
         // Update the collection
-        tramiteExistente.getClasesLicencia().clear(); // Clear the old collection
-        if (request.getClasesLicencia() != null) {
-            request.getClasesLicencia().forEach(claseEnum -> {
-                TramiteLicencia tl = new TramiteLicencia();
-                tl.setClaseLicencia(claseEnum);
-                tl.setTramite(tramiteExistente);
-                tramiteExistente.getClasesLicencia().add(tl); // Add the new ones
-            });
+
+        Set<ClaseLicencia> actuales = tramiteExistente.getClasesLicencia()
+                .stream()
+                .map(TramiteLicencia::getClaseLicencia)
+                .collect(Collectors.toSet());
+
+        Set<ClaseLicencia> nuevas = new HashSet<>(request.getClasesLicencia());
+
+        if (!nuevas.containsAll(actuales)) {
+            throw new IllegalArgumentException(
+                    "No se pueden eliminar clases de licencia existentes.");
         }
+
+        nuevas.stream()
+                .filter(clase -> !actuales.contains(clase))
+                .forEach(clase -> {
+                    TramiteLicencia tl = new TramiteLicencia();
+                    tl.setClaseLicencia(clase);
+                    tl.setTramite(tramiteExistente);
+                    tramiteExistente.getClasesLicencia().add(tl);
+                });
 
         return tramiteRepository.save(tramiteExistente);
     }
@@ -84,7 +110,8 @@ public class TramiteServiceImpl implements TramiteService {
             tramiteRepository.deleteById(id);
             return true;
         } catch (DataIntegrityViolationException e) {
-            throw new OperacionNoPermitidaException("No se puede eliminar el trámite porque tiene movimientos asociados.");
+            throw new OperacionNoPermitidaException(
+                    "No se puede eliminar el trámite porque tiene movimientos asociados.");
         }
     }
 
