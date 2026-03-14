@@ -99,10 +99,10 @@ public class CitaMapper {
     public Map<String, Object> createVariablesCorreoCita(Cita cita, String nombres) {
         return Map.of(
                 "nombres", nombres,
-                "fecha", cita.getFechaAgenda().toString(),
-                "hora", cita.getHoraInicioBloqueHoraio().toString(),
+                "fechaCita", cita.getFechaAgenda().toString(),
+                "horaCita", cita.getHoraInicioBloqueHoraio().toString(),
                 "tramite", cita.nombreTramite(),
-                "urlPlataforma", appProperties.getPlataformaUrl()
+                "urlCita", appProperties.getPlataformaUrl()
         );
     }
 
